@@ -33,5 +33,10 @@ urlpatterns = [
     # AI DJ & Track Generation
     path('ai/dj/', views.ai_mood_dj, name='ai_mood_dj'),
     path('ai/generate/', views.ai_generate_song, name='ai_generate_song'),
+
+    # User Authentication (Stored in MongoDB 'users')
+    path('signup/', views.signup_view, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
 ]
 

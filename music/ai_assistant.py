@@ -228,6 +228,7 @@ def process_chat_query(user_message, session_id='guest-session', client_ip='127.
             priority="Medium",
             ai_generated=True,
         )
+        mongo_service.record_support_ticket(ticket)
         ticket_data = {
             "ticket_number": ticket.ticket_number,
             "status": ticket.status,
@@ -235,7 +236,7 @@ def process_chat_query(user_message, session_id='guest-session', client_ip='127.
             "subject": ticket.subject
         }
         result['ticket_created'] = ticket_data
-        result['answer'] += f"\n\n **Support Ticket Created in SQL Database!**\n- Ticket ID: `{ticket.ticket_number}`\n- Status: `{ticket.status}`\n- You can review this ticket on the **[Support Center](/support/)** page."
+        result['answer'] += f"\n\n **Support Ticket Created Successfully!**\n- Ticket ID: `{ticket.ticket_number}`\n- Status: `{ticket.status}`\n- You can review this ticket on the **[Support Center](/support/)** page."
 
     # Persist interaction to MongoDB
     mongo_log_id = mongo_service.log_chat_interaction(

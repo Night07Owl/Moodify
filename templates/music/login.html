@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log in - Moodify{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper" style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+  
+  <div class="auth-card" style="max-width: 440px; width: 100%; background: linear-gradient(145deg, #181824, #121218); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
+    
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 28px;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(29, 185, 84, 0.15); border: 1px solid rgba(29, 185, 84, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--sp-green); margin-bottom: 14px;">
+        <i class="fa-brands fa-spotify"></i>
+      </div>
+      <h1 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+        Log in to Moodify
+      </h1>
+      <p style="color: #a1a1aa; font-size: 0.88rem; margin: 0;">
+        Welcome back! Enter your details to continue.
+      </p>
+    </div>
+
+    <!-- Login Form -->
+    <form action="{% url 'login' %}" method="POST">
+      {% csrf_token %}
+      {% if request.GET.next %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+      {% endif %}
+
+      <div style="margin-bottom: 18px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #d4d4d8; margin-bottom: 6px;">
+          Username or Email
+        </label>
+        <div style="position: relative;">
+          <i class="fa-solid fa-user" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #71717a; font-size: 0.88rem;"></i>
+          <input 
+            type="text" 
+            name="username_or_email" 
+            placeholder="e.g. nightowl or user@example.com"
+            required
+            autofocus
+            style="width: 100%; background: #121218; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 14px 12px 38px; color: #fff; font-size: 0.92rem; outline: none; transition: border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--sp-green)';"
+            onblur="this.style.borderColor='rgba(255,255,255,0.15)';"
+          >
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #d4d4d8; margin-bottom: 6px;">
+          Password
+        </label>
+        <div style="position: relative;">
+          <i class="fa-solid fa-lock" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #71717a; font-size: 0.88rem;"></i>
+          <input 
+            type="password" 
+            name="password" 
+            placeholder="Enter your password"
+            required
+            style="width: 100%; background: #121218; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 14px 12px 38px; color: #fff; font-size: 0.92rem; outline: none; transition: border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--sp-green)';"
+            onblur="this.style.borderColor='rgba(255,255,255,0.15)';"
+          >
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        style="width: 100%; background: var(--sp-green); color: #000; border: none; padding: 13px; border-radius: 9999px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;"
+        onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(29, 185, 84, 0.4)';"
+        onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+      >
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Log In</span>
+      </button>
+    </form>
+
+    <!-- Switch to Signup -->
+    <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.88rem; color: #a1a1aa;">
+      Don't have an account? 
+      <a href="{% url 'signup' %}" style="color: var(--sp-green); font-weight: 700; text-decoration: underline; margin-left: 4px;">
+        Sign up for Moodify
+      </a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

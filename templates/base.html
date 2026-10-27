@@ -71,6 +71,21 @@
               <span>Health Status</span>
             </a>
           </li>
+          {% if request.user.is_authenticated %}
+            <li class="sidebar-nav-item">
+              <a href="{% url 'logout' %}">
+                <i class="fa-solid fa-arrow-right-from-bracket" style="color: #f87171;"></i>
+                <span>Log out ({{ request.user.username }})</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="sidebar-nav-item">
+              <a href="{% url 'login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <i class="fa-solid fa-right-to-bracket" style="color: var(--sp-green);"></i>
+                <span>Log in</span>
+              </a>
+            </li>
+          {% endif %}
         </ul>
       </div>
 
@@ -183,10 +198,33 @@
         </form>
 
         <!-- Right Side Actions -->
-        <div class="topbar-right-actions">
+        <div class="topbar-right-actions" style="display: flex; align-items: center; gap: 10px;">
           <button type="button" class="btn-add-spotify open-ai-studio-btn" title="Create or generate tracks with AI" style="background: linear-gradient(135deg, #7c3aed, #a855f7); border: none; color: #fff; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);">
             <i class="fa-solid fa-wand-magic-sparkles"></i> AI Song Studio
           </button>
+
+          {% if request.user.is_authenticated %}
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-full); padding: 4px 12px; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--sp-green); color: #000; font-weight: 800; font-size: 0.72rem; display: flex; align-items: center; justify-content: center;">
+                  {{ request.user.username|make_list|first|upper }}
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">{{ request.user.username }}</span>
+              </div>
+              <a href="{% url 'logout' %}" style="background: #27272a; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.12); padding: 7px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#a1a1aa';">
+                Log out
+              </a>
+            </div>
+          {% else %}
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <a href="{% url 'signup' %}" style="color: var(--sp-text-subdued); font-size: 0.85rem; font-weight: 700; text-decoration: none; padding: 6px 12px; transition: color 0.2s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--sp-text-subdued)';">
+                Sign up
+              </a>
+              <a href="{% url 'login' %}" style="background: #fff; color: #000; font-size: 0.85rem; font-weight: 800; padding: 8px 18px; border-radius: var(--radius-full); text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='none';">
+                Log in
+              </a>
+            </div>
+          {% endif %}
         </div>
 
       </header>

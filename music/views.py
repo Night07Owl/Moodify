@@ -230,6 +230,88 @@ def favorites_list(request):
     return render(request, 'music/favorites.html', context)
 
 
+# ============================================================================
+# USER AUTHENTICATION (MongoDB Users Collection)
+# ============================================================================
+
+def signup_view(request):
+    """
+    User registration view.
+    Stores account credentials in MongoDB 'users' collection and logs in.
+    """
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if not username or not email or not password:
+            messages.error(request, "Please fill in all required fields.")
+        elif len(username) < 3:
+            messages.error(request, "Username must be at least 3 characters long.")
+        elif password != confirm_password:
+            messages.error(request, "Passwords do not match. Please try again.")
+        elif len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters.")
+        else:
+            success, result = mongo_service.create_mongo_user(username, email, password)
+            if success:
+                from django.contrib.auth.models import User
+                django_user, _ = User.objects.get_or_create(username=username.lower(), defaults={'email': email.lower()})
+                django_user.set_password(password)
+                django_user.save()
+                login(request, django_user)
+                messages.success(request, f"Welcome to Moodify, {username}! Your account has been registered.")
+                return redirect('home')
+            else:
+                messages.error(request, result)
+
+    return render(request, 'music/signup.html')
+
+
+def login_view(request):
+    """
+    User authentication view.
+    Validates credentials against MongoDB 'users' collection and establishes session.
+    """
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        username_or_email = request.POST.get('username_or_email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not username_or_email or not password:
+            messages.error(request, "Please enter your username/email and password.")
+        else:
+            mongo_user = mongo_service.authenticate_mongo_user(username_or_email, password)
+            if mongo_user:
+                from django.contrib.auth.models import User
+                u_name = mongo_user.get('username', username_or_email).lower()
+                u_email = mongo_user.get('email', '')
+                django_user, _ = User.objects.get_or_create(username=u_name, defaults={'email': u_email})
+                login(request, django_user)
+                messages.success(request, f"Welcome back, {mongo_user.get('display_name', u_name)}!")
+                next_url = request.GET.get('next') or request.POST.get('next') or 'home'
+                return redirect(next_url)
+            else:
+                messages.error(request, "Invalid username/email or password. Please try again.")
+
+    return render(request, 'music/login.html')
+
+
+def logout_view(request):
+    """
+    Logs out the user and clears session.
+    """
+    logout(request)
+    messages.success(request, "You have been logged out.")
+    return redirect('home')
+
+
 @csrf_exempt
 @require_POST
 def ai_mood_dj(request):
@@ -532,6 +614,9 @@ def support_view(request):
                 description=description,
                 status='Open'
             )
+            # Sync ticket to MongoDB collection 'support_tickets'
+            mongo_service.record_support_ticket(ticket)
+
             messages.success(request, f"Support Ticket {ticket.ticket_number} created successfully! Our engineering team will review it shortly.")
             return redirect(f"/support/?ticket_number={ticket.ticket_number}")
         else:
@@ -666,6 +751,8 @@ def api_create_ticket(request):
         status='Open',
         ai_generated=data.get('ai_generated', False)
     )
+    # Sync ticket to MongoDB collection 'support_tickets'
+    mongo_service.record_support_ticket(ticket)
 
     return JsonResponse({
         'success': True,
