@@ -28,10 +28,16 @@ def get_mongo_database():
     mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', 'mongodb://127.0.0.1:27017/moodmusic_db'))
     db_name = getattr(settings, 'MONGODB_NAME', os.environ.get('MONGODB_NAME', 'moodmusic_db'))
 
-    # First attempt real pymongo connection with 1.5s timeout
+    # First attempt real pymongo connection with 2.5s timeout and certifi TLS CA
     try:
         import pymongo
-        client = pymongo.MongoClient(mongo_uri, serverSelectionTimeoutMS=1500)
+        client_kwargs = {'serverSelectionTimeoutMS': 2500}
+        try:
+            import certifi
+            client_kwargs['tlsCAFile'] = certifi.where()
+        except Exception:
+            pass
+        client = pymongo.MongoClient(mongo_uri.strip(), **client_kwargs)
         # Verify connection by triggering a quick ping
         client.admin.command('ping')
         _mongo_client = client
