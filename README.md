@@ -198,9 +198,3 @@ The website layout, sidebar drawer, player bar, and floating AI chat widget are 
 - `.gitignore` prevents `.env`, `logs/requests.log`, and `db.sqlite3` from being committed to source control.
 - Cross-Site Request Forgery (CSRF) protection is enforced on all data-modifying POST endpoints.
 
----
-
-## 👤 Author & Academic Declaration
-- **Student Name / Author**: Night07Owl
-- **Course**: Final Assessment of Software Development
-- **Project**: Moodify — AI-Driven Ambient Music Platform & Interactive Support Assistant
