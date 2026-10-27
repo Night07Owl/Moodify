@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ song.title }} - {{ song.artist }} | Moodify{% endblock %}
+
+{% block content %}
+
+<!-- Song Header Showcase -->
+<div class="spotify-playlist-header" style="background: linear-gradient(180deg, rgba(139, 92, 246, 0.25) 0%, transparent 100%);">
+  
+  <img src="{{ song.cover_image_url }}" alt="{{ song.title }}" class="playlist-big-artwork" style="box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+
+  <div class="playlist-header-meta">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="playlist-type-tag">Song</span>
+      {% if song.is_ai_generated %}
+        <span style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 4px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Moodify AI Created
+        </span>
+      {% endif %}
+    </div>
+
+    <h1 class="playlist-header-title">{{ song.title }}</h1>
+    
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 700; flex-wrap: wrap;">
+      <span style="color: #fff;">{{ song.artist }}</span> &bull;
+      <a href="{% url 'mood_detail' song.mood.slug %}" style="color: {{ song.mood.accent_color }};">{{ song.mood.name }} Mood</a> &bull;
+      <span style="color: var(--sp-text-subdued);">{{ song.genre|default:"Alternative" }}</span> &bull;
+      <span style="color: var(--sp-text-subdued);">{{ song.duration }}</span>
+    </div>
+
+    <p class="playlist-header-desc">{{ song.description|default:"Curated track on Moodify." }}</p>
+
+    {% if song.ai_prompt %}
+      <div style="margin-top: 10px; font-size: 0.85rem; color: #c084fc; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 6px 12px; border-radius: var(--radius-sm); display: inline-block;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Prompt: "{{ song.ai_prompt }}"
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Action Strip (Play button + Favorite) -->
+<div class="playlist-actions-strip">
+  <button 
+    type="button" 
+    class="playlist-huge-play-btn sp-play-trigger"
+    data-song-id="{{ song.id }}"
+    data-song-title="{{ song.title }}"
+    data-song-artist="{{ song.artist }}"
+    data-song-cover="{{ song.cover_image_url }}"
+    data-song-audio="{{ song.audio_preview_url }}"
+    title="Play {{ song.title }}"
+  >
+    <i class="fa-solid fa-play"></i>
+  </button>
+
+  <button 
+    type="button" 
+    class="fav-toggle-btn {% if is_favorited %}favorited{% endif %}" 
+    data-song-id="{{ song.id }}"
+    data-url="{% url 'toggle_favorite' song.id %}"
+    style="color: {% if is_favorited %}var(--sp-green){% else %}var(--sp-text-dim){% endif %}; font-size: 1.8rem;"
+    title="Save to Liked Songs"
+  >
+    {% if is_favorited %}
+      <i class="fa-solid fa-heart"></i>
+    {% else %}
+      <i class="fa-regular fa-heart"></i>
+    {% endif %}
+  </button>
+
+  <button 
+    type="button" 
+    class="btn-add-spotify open-ai-studio-btn" 
+    style="padding: 10px 20px; font-size: 0.9rem; background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff;"
+    title="Generate similar track with AI"
+  >
+    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Similar with AI
+  </button>
+</div>
+
+<!-- AI Track Blueprint Showcase -->
+<div style="background: var(--sp-surface); padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(168, 85, 247, 0.2); max-width: 600px; margin-bottom: 36px;">
+  <h3 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+    <i class="fa-solid fa-brain" style="color: #c084fc;"></i> AI Acoustic &amp; Mood DNA
+  </h3>
+  
+  <div style="margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+      <span style="color: var(--sp-text-subdued);">Energy &amp; Velocity Level</span>
+      <span style="color: #fff; font-weight: 700;">{{ song.energy_score|default:55 }}%</span>
+    </div>
+    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+      <div style="width: {{ song.energy_score|default:55 }}%; height: 100%; background: linear-gradient(90deg, #7c3aed, #ec4899); border-radius: 4px;"></div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+    <div style="background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: var(--radius-sm);">
+      <div style="font-size: 0.75rem; color: var(--sp-text-subdued);">Primary Vibe</div>
+      <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 2px;">{{ song.mood.name }} Frequency</div>
+    </div>
+    <div style="background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: var(--radius-sm);">
+      <div style="font-size: 0.75rem; color: var(--sp-text-subdued);">Optimal Setting</div>
+      <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 2px;">{{ song.mood.tagline }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- More from this Mood -->
+{% if similar_songs %}
+  <section class="spotify-shelf">
+    <div class="shelf-header">
+      <h2 class="shelf-title">More in {{ song.mood.name }} Mood</h2>
+      <a href="{% url 'mood_detail' song.mood.slug %}" class="shelf-see-all">See all</a>
+    </div>
+
+    <div class="spotify-card-grid">
+      {% for sim in similar_songs %}
+        <div 
+          class="spotify-music-card"
+          data-song-id="{{ sim.id }}"
+          data-song-title="{{ sim.title }}"
+          data-song-artist="{{ sim.artist }}"
+          data-song-cover="{{ sim.cover_image_url }}"
+          data-song-audio="{{ sim.audio_preview_url }}"
+          onclick="window.location.href='{% url 'song_detail' sim.id %}';"
+        >
+          <div class="card-artwork-wrapper">
+            <img src="{{ sim.cover_image_url }}" alt="{{ sim.title }}" class="card-artwork-img" loading="lazy">
+            <button 
+              type="button" 
+              class="spotify-card-play-btn sp-play-trigger" 
+              title="Play {{ sim.title }}"
+              onclick="event.stopPropagation();"
+            >
+              <i class="fa-solid fa-play"></i>
+            </button>
+          </div>
+
+          <div class="card-title-text"><a href="{% url 'song_detail' sim.id %}">{{ sim.title }}</a></div>
+          <div class="card-artist-text">{{ sim.artist }}</div>
+
+          <div class="card-actions-bar" onclick="event.stopPropagation();">
+            <span class="spotify-tag-badge">{{ sim.duration }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% endblock %}

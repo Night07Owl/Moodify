@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Moodify - AI Mood-Based Music Discovery{% endblock %}
+
+{% block content %}
+
+<!-- Moodify AI DJ & Emotion Curator Showcase -->
+<section class="ai-dj-hero-card" id="aiDjSection" style="margin-bottom: 32px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: var(--radius-lg); padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+  
+  <div style="position: absolute; right: -20px; top: -20px; font-size: 8rem; color: rgba(168, 85, 247, 0.08); pointer-events: none;">
+    <i class="fa-solid fa-wand-magic-sparkles"></i>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <span style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 5px;">
+      <i class="fa-solid fa-sparkles"></i> AI Powered
+    </span>
+    <span style="color: var(--sp-text-subdued); font-size: 0.85rem;">Natural Language Emotion Detection</span>
+  </div>
+
+  <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+    ✨ Moodify AI DJ: Tell me how you're feeling right now
+  </h2>
+  <p style="color: var(--sp-text-subdued); font-size: 0.9rem; max-width: 650px; margin-bottom: 18px;">
+    Type anything in plain English—whether you're grinding through study sessions, hyped for a run, or unwinding on a rainy evening. Our AI tunes your frequency instantly.
+  </p>
+
+  <!-- AI DJ Prompt Bar -->
+  <form id="aiDjForm" action="{% url 'ai_mood_dj' %}" method="POST" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+    {% csrf_token %}
+    <div style="flex: 1; min-width: 280px; position: relative;">
+      <i class="fa-solid fa-wand-magic-sparkles" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #c084fc; font-size: 1rem;"></i>
+      <input 
+        type="text" 
+        name="prompt" 
+        id="aiDjInput"
+        placeholder="e.g. 'Exhausted after finals, need quiet calm' or 'Crushing my workout, give me high voltage'..."
+        style="width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(168, 85, 247, 0.5); border-radius: var(--radius-full); padding: 13px 20px 13px 44px; color: #fff; font-size: 0.95rem; outline: none; transition: all 0.2s ease;"
+        onfocus="this.style.borderColor='#c084fc'; this.style.boxShadow='0 0 15px rgba(192, 132, 252, 0.3)';"
+        onblur="this.style.borderColor='rgba(168, 85, 247, 0.5)'; this.style.boxShadow='none';"
+      >
+    </div>
+    <button 
+      type="submit" 
+      id="aiDjSubmitBtn"
+      style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-weight: 700; border: none; padding: 12px 24px; border-radius: var(--radius-full); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s ease, box-shadow 0.2s ease;"
+      onmouseover="this.style.transform='scale(1.03)';"
+      onmouseout="this.style.transform='scale(1)';"
+    >
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>Ask AI DJ</span>
+    </button>
+  </form>
+
+  <!-- Quick Emotion Chips -->
+  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+    <span style="font-size: 0.8rem; color: var(--sp-text-subdued); font-weight: 700;">Quick Vibes:</span>
+    <button type="button" class="ai-chip-btn" data-vibe="Late night coding session with high focus and no distractions">🌙 Midnight Focus</button>
+    <button type="button" class="ai-chip-btn" data-vibe="Crushing a heavy workout at the gym, need high adrenaline">⚡ Gym Beast Mode</button>
+    <button type="button" class="ai-chip-btn" data-vibe="Quiet rainy Sunday afternoon by the window with nostalgic comfort">🌧️ Rainy Solace</button>
+    <button type="button" class="ai-chip-btn" data-vibe="Sunny weekend with friends, feeling happy and celebrating">🎉 Weekend Euphoria</button>
+    <button type="button" class="ai-chip-btn" data-vibe="Sipping morning coffee and relaxing with calm acoustic beats">☕ Cozy Coffee Chill</button>
+    <button type="button" class="ai-chip-btn" data-vibe="Candlelight dinner with someone special, sweet and romantic">💖 Sweet Romance</button>
+  </div>
+
+  <!-- Dynamic AI DJ Response Container (Updated live via AJAX) -->
+  <div id="aiDjResultBox" style="display: none; margin-top: 20px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: var(--radius-md); padding: 18px; animation: fadeIn 0.3s ease;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="aiDjVibeTitle" style="font-size: 1.1rem; font-weight: 800; color: #fff;">Detected Mood</span>
+            <span id="aiDjConfidenceBadge" style="background: rgba(30, 215, 96, 0.2); color: var(--sp-green); font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: var(--radius-full);">95% Match</span>
+            <span id="aiDjEnergyBadge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: var(--radius-full);">⚡ Energy: 75%</span>
+          </div>
+          <p id="aiDjCommentary" style="color: #e2e8f0; font-size: 0.9rem; margin-top: 4px; line-height: 1.4;"></p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" id="aiPlayMixBtn" class="btn-modal-submit" style="background: var(--sp-green); color: #000; font-weight: 800; padding: 10px 18px; border-radius: var(--radius-full); font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-play"></i>
+          <span>Play AI Recommendation</span>
+        </button>
+        <button type="button" id="closeAiDjResultBtn" style="color: var(--sp-text-subdued); font-size: 1.2rem; cursor: pointer; padding: 4px 8px;">&times;</button>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+
+<!-- Spotify Greeting & Quick Access Grid -->
+{% if not selected_mood_slug and not search_query %}
+<section class="spotify-greeting-section">
+  
+  <h1 class="spotify-greeting-title">
+    Good vibes, music lover
+  </h1>
+
+  <!-- Top 6 Quick Access Mood Cards -->
+  <div class="quick-mood-grid">
+    {% for m in all_moods %}
+      <div 
+        class="quick-mood-card"
+        onclick="window.location.href='{% url 'mood_detail' m.slug %}';"
+        title="Open {{ m.name }} Mix"
+      >
+        <div class="quick-mood-thumb" style="background: {{ m.gradient }};">
+          {% if m.icon == 'smile' %}
+            <i class="fa-solid fa-face-smile"></i>
+          {% elif m.icon == 'coffee' %}
+            <i class="fa-solid fa-mug-hot"></i>
+          {% elif m.icon == 'zap' %}
+            <i class="fa-solid fa-bolt"></i>
+          {% elif m.icon == 'heart' %}
+            <i class="fa-solid fa-heart"></i>
+          {% elif m.icon == 'brain' %}
+            <i class="fa-solid fa-brain"></i>
+          {% elif m.icon == 'cloud-rain' %}
+            <i class="fa-solid fa-cloud-showers-heavy"></i>
+          {% else %}
+            <i class="fa-solid fa-music"></i>
+          {% endif %}
+        </div>
+        
+        <span class="quick-mood-title">{{ m.name }} Mix</span>
+
+        <!-- Quick Green Play Button -->
+        <button 
+          type="button" 
+          class="quick-mood-play-btn sp-play-trigger"
+          {% if m.songs.first %}
+            data-song-id="{{ m.songs.first.id }}"
+            data-song-title="{{ m.songs.first.title }}"
+            data-song-artist="{{ m.songs.first.artist }}"
+            data-song-cover="{{ m.songs.first.cover_image_url }}"
+            data-song-audio="{{ m.songs.first.audio_preview_url }}"
+          {% endif %}
+          title="Play {{ m.name }} Mix"
+          onclick="event.stopPropagation();"
+        >
+          <i class="fa-solid fa-play"></i>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+</section>
+{% endif %}
+
+
+<!-- Active Filter / Shelf Header -->
+<section class="spotify-shelf">
+  
+  <div class="shelf-header">
+    <div>
+      <h2 class="shelf-title">
+        {% if selected_mood %}
+          {{ selected_mood.name }} Frequency
+        {% elif search_query %}
+          Search results for "{{ search_query }}"
+        {% else %}
+          Made For You &bull; Curated Tracks
+        {% endif %}
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--sp-text-subdued); margin-top: 4px;">
+        {% if selected_mood %}
+          {{ selected_mood.tagline }}
+        {% else %}
+          Direct audio playback across all emotional frequencies
+        {% endif %}
+      </p>
+    </div>
+
+    {% if selected_mood_slug or search_query %}
+      <a href="{% url 'home' %}" class="shelf-see-all">Show all tracks</a>
+    {% endif %}
+  </div>
+
+  <!-- Song Cards Grid (Cleaned: Zero external YouTube/Spotify clutter) -->
+  {% if songs %}
+    <div class="spotify-card-grid" id="mainSongsGrid">
+      {% for song in songs %}
+        <div 
+          class="spotify-music-card"
+          data-song-id="{{ song.id }}"
+          data-song-title="{{ song.title }}"
+          data-song-artist="{{ song.artist }}"
+          data-song-cover="{{ song.cover_image_url }}"
+          data-song-audio="{{ song.audio_preview_url }}"
+          onclick="window.location.href='{% url 'song_detail' song.id %}';"
+        >
+          <!-- Artwork with Hover Circular Play Button -->
+          <div class="card-artwork-wrapper">
+            <img 
+              src="{{ song.cover_image_url }}" 
+              alt="{{ song.title }} Cover Art" 
+              class="card-artwork-img"
+              loading="lazy"
+            >
+
+            <!-- Floating Green Play Button -->
+            <button 
+              type="button" 
+              class="spotify-card-play-btn sp-play-trigger" 
+              title="Play {{ song.title }}"
+              onclick="event.stopPropagation();"
+            >
+              <i class="fa-solid fa-play"></i>
+            </button>
+          </div>
+
+          <!-- Title & Artist -->
+          <div class="card-title-text" title="{{ song.title }}">
+            <a href="{% url 'song_detail' song.id %}" onclick="event.stopPropagation();">{{ song.title }}</a>
+          </div>
+          
+          <div class="card-artist-text" title="{{ song.artist }}">
+            {{ song.artist }}
+          </div>
+
+          <!-- Bottom bar of card -->
+          <div class="card-actions-bar" onclick="event.stopPropagation();">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="spotify-tag-badge">{{ song.mood.name }}</span>
+              {% if song.is_ai_generated %}
+                <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 3px;" title="Generated by Moodify AI">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> AI
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- Favorite Toggle -->
+            <button 
+              type="button" 
+              class="fav-toggle-btn {% if song.id in user_favorite_ids %}favorited{% endif %}" 
+              data-song-id="{{ song.id }}"
+              data-url="{% url 'toggle_favorite' song.id %}"
+              title="Save to Liked Songs"
+              style="color: {% if song.id in user_favorite_ids %}var(--sp-green){% else %}var(--sp-text-dim){% endif %}; font-size: 0.95rem;"
+            >
+              {% if song.id in user_favorite_ids %}
+                <i class="fa-solid fa-heart"></i>
+              {% else %}
+                <i class="fa-regular fa-heart"></i>
+              {% endif %}
+            </button>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background: var(--sp-surface); border-radius: var(--radius-md); padding: 48px 24px; text-align: center; margin-top: 24px;">
+      <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 2.5rem; color: #c084fc; margin-bottom: 16px;"></i>
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 8px;">No tracks found for "{{ search_query }}"</h3>
+      <p style="color: var(--sp-text-subdued); font-size: 0.9rem; margin-bottom: 20px;">
+        Generate an original song matching this vibe with Moodify AI!
+      </p>
+      <button type="button" class="btn-add-spotify open-ai-studio-btn" style="margin: 0 auto; background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Song with AI
+      </button>
+    </div>
+  {% endif %}
+
+</section>
+
+<!-- Mood Mixes Section (Category Tiles) -->
+<section class="spotify-shelf">
+  <div class="shelf-header">
+    <h2 class="shelf-title">Browse Mood Playlists</h2>
+    <span style="font-size: 0.85rem; color: var(--sp-text-subdued);">Sorted by emotional state</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+    {% for m in all_moods %}
+      <a 
+        href="{% url 'mood_detail' m.slug %}" 
+        style="background: {{ m.gradient }}; border-radius: var(--radius-md); height: 160px; padding: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.2s ease;"
+        onmouseover="this.style.transform='scale(1.03)';"
+        onmouseout="this.style.transform='scale(1)';"
+      >
+        <div style="font-size: 1.35rem; font-weight: 800; color: #fff; line-height: 1.1;">{{ m.name }}</div>
+        <div style="position: absolute; right: -8px; bottom: -8px; font-size: 4.5rem; color: rgba(255, 255, 255, 0.25); transform: rotate(20deg);">
+          {% if m.icon == 'smile' %}
+            <i class="fa-solid fa-face-smile"></i>
+          {% elif m.icon == 'coffee' %}
+            <i class="fa-solid fa-mug-hot"></i>
+          {% elif m.icon == 'zap' %}
+            <i class="fa-solid fa-bolt"></i>
+          {% elif m.icon == 'heart' %}
+            <i class="fa-solid fa-heart"></i>
+          {% elif m.icon == 'brain' %}
+            <i class="fa-solid fa-brain"></i>
+          {% elif m.icon == 'cloud-rain' %}
+            <i class="fa-solid fa-cloud-showers-heavy"></i>
+          {% else %}
+            <i class="fa-solid fa-music"></i>
+          {% endif %}
+        </div>
+        <span style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.8);">{{ m.song_count }} Songs &rarr;</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

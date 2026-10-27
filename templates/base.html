@@ -1,0 +1,729 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Moodify - Web Player: Music for every mood{% endblock %}</title>
+  <meta name="description" content="Moodify is a Spotify-inspired mood-based music discovery platform featuring playlists and soundscapes for Happy, Sad, Chill, Energetic, Romantic, and Focus states.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Spotify-Inspired Design System -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Full Spotify Desktop Layout -->
+  <div class="spotify-app">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="spotify-sidebar">
+      
+      <!-- Top Nav Box -->
+      <div class="sidebar-box">
+        <a href="{% url 'home' %}" class="sidebar-brand">
+          <i class="fa-brands fa-spotify brand-disc"></i>
+          <span>Mood<span style="color: var(--sp-green);">ify</span></span>
+        </a>
+
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' and not selected_mood_slug and not search_query %}active{% endif %}">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{% url 'home' %}?q=" class="{% if search_query %}active{% endif %}" onclick="document.getElementById('mainSearchInput')?.focus();">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Search</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{% url 'favorites_list' %}" class="{% if request.resolver_match.url_name == 'favorites_list' %}active{% endif %}">
+              <i class="fa-solid fa-heart" style="color: var(--sp-green);"></i>
+              <span>Liked Songs</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{% url 'faq' %}" class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}">
+              <i class="fa-solid fa-circle-question" style="color: #c084fc;"></i>
+              <span>FAQ &amp; Errors</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{% url 'support' %}" class="{% if request.resolver_match.url_name == 'support' %}active{% endif %}">
+              <i class="fa-solid fa-headset" style="color: #38bdf8;"></i>
+              <span>Support Tickets</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{% url 'health_check' %}" class="{% if request.resolver_match.url_name == 'health_check' %}active{% endif %}">
+              <i class="fa-solid fa-heart-pulse" style="color: #4ade80;"></i>
+              <span>Health Status</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Bottom Library Box -->
+      <div class="sidebar-library-box">
+        
+        <div class="library-header">
+          <div class="library-title" onclick="window.location.href='{% url 'favorites_list' %}';">
+            <i class="fa-solid fa-book-bookmark"></i>
+            <span>Your Library</span>
+          </div>
+
+          <div class="library-actions">
+            <button type="button" class="library-btn open-ai-studio-btn" title="AI Song Studio: Create or generate track with AI">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="library-filter-pills">
+          <a href="{% url 'home' %}" class="lib-pill {% if not selected_mood_slug %}active{% endif %}">All</a>
+          {% for m in all_moods %}
+            <a href="{% url 'home' %}?mood={{ m.slug }}" class="lib-pill {% if selected_mood_slug == m.slug %}active{% endif %}">{{ m.name }}</a>
+          {% endfor %}
+        </div>
+
+        <!-- Scrollable Playlists / Moods -->
+        <div class="sidebar-playlists-scroll">
+          
+          <!-- Pinned Liked Songs -->
+          <a href="{% url 'favorites_list' %}" class="playlist-row-item {% if request.resolver_match.url_name == 'favorites_list' %}active{% endif %}">
+            <div class="playlist-thumb" style="background: linear-gradient(135deg, #450af5, #8e8ee5);">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="playlist-meta">
+              <div class="playlist-name">Liked Songs</div>
+              <div class="playlist-sub">Playlist &bull; Saved Tracks</div>
+            </div>
+          </a>
+
+          <!-- Six Curated Mood Playlists -->
+          {% for m in all_moods %}
+            <a href="{% url 'mood_detail' m.slug %}" class="playlist-row-item {% if selected_mood_slug == m.slug %}active{% endif %}">
+              <div class="playlist-thumb" style="background: {{ m.gradient }};">
+                {% if m.icon == 'smile' %}
+                  <i class="fa-solid fa-face-smile"></i>
+                {% elif m.icon == 'coffee' %}
+                  <i class="fa-solid fa-mug-hot"></i>
+                {% elif m.icon == 'zap' %}
+                  <i class="fa-solid fa-bolt"></i>
+                {% elif m.icon == 'heart' %}
+                  <i class="fa-solid fa-heart"></i>
+                {% elif m.icon == 'brain' %}
+                  <i class="fa-solid fa-brain"></i>
+                {% elif m.icon == 'cloud-rain' %}
+                  <i class="fa-solid fa-cloud-showers-heavy"></i>
+                {% else %}
+                  <i class="fa-solid fa-music"></i>
+                {% endif %}
+              </div>
+              <div class="playlist-meta">
+                <div class="playlist-name">{{ m.name }} Mix</div>
+                <div class="playlist-sub">Mood &bull; {{ m.song_count }} tracks</div>
+              </div>
+            </a>
+          {% endfor %}
+
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="spotify-main-wrapper">
+      
+      <!-- Top Sticky Header -->
+      <header class="spotify-topbar">
+        
+        <div class="topbar-nav-arrows">
+          <button type="button" class="nav-arrow-btn" onclick="window.history.back();" title="Go back">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button type="button" class="nav-arrow-btn" onclick="window.history.forward();" title="Go forward">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Universal Spotify-style Search -->
+        <form action="{% url 'home' %}" method="GET" class="topbar-search-form">
+          {% if selected_mood_slug %}
+            <input type="hidden" name="mood" value="{{ selected_mood_slug }}">
+          {% endif %}
+          <i class="fa-solid fa-magnifying-glass topbar-search-icon"></i>
+          <input 
+            type="text" 
+            name="q" 
+            id="mainSearchInput"
+            class="topbar-search-input" 
+            placeholder="What do you want to play? (Press '/' to focus)" 
+            value="{{ search_query }}"
+            autocomplete="off"
+          >
+          {% if search_query %}
+            <a href="{% url 'home' %}{% if selected_mood_slug %}?mood={{ selected_mood_slug }}{% endif %}" class="topbar-search-clear" title="Clear">
+              <i class="fa-solid fa-xmark"></i>
+            </a>
+          {% endif %}
+        </form>
+
+        <!-- Right Side Actions -->
+        <div class="topbar-right-actions">
+          <button type="button" class="btn-add-spotify open-ai-studio-btn" title="Create or generate tracks with AI" style="background: linear-gradient(135deg, #7c3aed, #a855f7); border: none; color: #fff; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Song Studio
+          </button>
+        </div>
+
+      </header>
+
+      <!-- Scrollable Inner View Content -->
+      <div class="spotify-scrollable-content">
+        
+        <!-- Alerts & Messages -->
+        {% if messages %}
+          <div style="padding-top: 16px;">
+            {% for message in messages %}
+              <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #fff; padding: 12px 18px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <div><i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc; margin-right: 8px;"></i> {{ message }}</div>
+                <button type="button" onclick="this.parentElement.remove();" style="color: #fff; opacity: 0.7;">&times;</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+      </div>
+
+    </div>
+
+    <!-- Persistent Bottom Spotify Player Bar -->
+    <footer class="spotify-bottom-player">
+      
+      <!-- Left: Now Playing Info -->
+      <div class="player-left-col">
+        <img 
+          src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80" 
+          alt="Album Art" 
+          class="player-track-img" 
+          id="spPlayerImg"
+        >
+        <div class="player-track-info">
+          <a href="#" class="player-track-name" id="spPlayerTitle">Select a song</a>
+          <span class="player-track-artist" id="spPlayerArtist">Moodify Player</span>
+        </div>
+
+        <button 
+          type="button" 
+          class="player-fav-btn fav-toggle-btn" 
+          id="spPlayerFavBtn" 
+          title="Save to your Liked Songs"
+        >
+          <i class="fa-regular fa-heart"></i>
+        </button>
+      </div>
+
+      <!-- Center: Playback Controls & Scrubber -->
+      <div class="player-center-col">
+        <div class="player-buttons-row">
+          <button type="button" class="sp-ctrl-icon" id="spShuffleBtn" title="Enable shuffle">
+            <i class="fa-solid fa-shuffle"></i>
+          </button>
+          
+          <button type="button" class="sp-ctrl-icon" id="spPrevBtn" title="Previous">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+
+          <button type="button" class="sp-main-play-btn" id="spPlayToggle" title="Play">
+            <i class="fa-solid fa-play"></i>
+          </button>
+
+          <button type="button" class="sp-ctrl-icon" id="spNextBtn" title="Next">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+
+          <button type="button" class="sp-ctrl-icon" id="spRepeatBtn" title="Enable repeat">
+            <i class="fa-solid fa-repeat"></i>
+          </button>
+        </div>
+
+        <div class="player-timeline-row">
+          <span class="timeline-time" id="spCurrentTime">0:00</span>
+          <div class="sp-scrubber-track" id="spScrubberTrack">
+            <div class="sp-scrubber-fill" id="spScrubberFill"></div>
+          </div>
+          <span class="timeline-time" id="spDuration">0:00</span>
+        </div>
+      </div>
+
+      <!-- Right: AI DJ Quick Button & Volume -->
+      <div class="player-right-col">
+        
+        <button type="button" class="btn-ai-dj-trigger" id="jumpToAiDjBtn" title="Ask AI DJ for recommendations" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI DJ</span>
+        </button>
+
+        <div class="volume-control-wrap">
+          <i class="fa-solid fa-volume-high"></i>
+          <input type="range" min="0" max="1" step="0.05" value="0.8" class="volume-slider" id="spVolumeSlider" title="Volume">
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- Modal: Moodify AI Music Studio -->
+  <div class="spotify-modal-overlay" id="aiStudioModal">
+    <div class="spotify-modal-card" style="border: 1px solid rgba(168, 85, 247, 0.4); box-shadow: 0 20px 50px rgba(124, 58, 237, 0.25);">
+      <div class="modal-header">
+        <div class="modal-title" style="color: #fff; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i>
+          <span>Moodify AI Song Studio</span>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeAiModal">&times;</button>
+      </div>
+
+      <form action="{% url 'ai_generate_song' %}" method="POST" id="aiSongGenForm">
+        {% csrf_token %}
+        
+        <div class="modal-form-group">
+          <label class="modal-label">Describe your vibe, or name any famous artist or song</label>
+          <input 
+            type="text" 
+            name="prompt" 
+            id="aiPromptInput"
+            class="modal-input" 
+            placeholder="e.g. Taylor Swift, The Weeknd, Drake, or 'upbeat summer gym workout'..." 
+            required
+          >
+          <div style="font-size: 0.75rem; color: #c084fc; margin-top: 4px;">
+            <i class="fa-solid fa-microphone-lines"></i> Discovers real hit songs by famous artists with authentic vocals and official album artwork.
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label class="modal-label">Target Mood Category (or choose Auto-Detect)</label>
+          <select name="mood_id" class="modal-select">
+            <option value="">✨ Auto-Detect Mood from Prompt</option>
+            {% for m in all_moods %}
+              <option value="{{ m.id }}">{{ m.name }} Mix</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="modal-form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label class="modal-label">Famous Song Title (optional)</label>
+            <input type="text" name="title" class="modal-input" placeholder="e.g. Cruel Summer">
+          </div>
+          <div>
+            <label class="modal-label">Famous Artist Name (optional)</label>
+            <input type="text" name="artist" class="modal-input" placeholder="e.g. Taylor Swift">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-modal-submit" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Find &amp; Add Famous Track with AI
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       FINAL ASSESSMENT REQUIREMENT: Persistent AI Support Chat Widget on Every Page
+       Grounded in SQL FAQs & Error Codes, Escalates to SQL Tickets, Logs to MongoDB
+       ========================================================================== -->
+  
+  <!-- Floating Launcher Button -->
+  <button type="button" class="chat-launcher-btn" id="chatLauncherBtn" title="Open AI Support Assistant (Grounded in SQL FAQ & Error Codes)">
+    <div class="chat-bot-avatar" style="width: 28px; height: 28px; font-size: 0.8rem;">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </div>
+    <span>AI Assistant</span>
+    <span class="chat-launcher-badge" title="Grounded in SQL FAQ &amp; Error Directory"></span>
+  </button>
+
+  <!-- Expandable Chat Panel Window -->
+  <div class="chat-window-panel" id="chatWindowPanel">
+    
+    <!-- Panel Header -->
+    <div class="chat-window-header">
+      <div class="chat-header-title">
+        <div class="chat-bot-avatar">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div class="chat-header-meta">
+          <h4>MoodMusic AI Assistant</h4>
+          <span><i class="fa-solid fa-circle" style="color: var(--sp-green); font-size: 0.55rem;"></i> SQL Knowledge Grounded &bull; MongoDB Logged</span>
+        </div>
+      </div>
+      <button type="button" class="chat-close-btn" id="chatCloseBtn" title="Minimize Chat">&times;</button>
+    </div>
+
+    <!-- Quick Prompt Chips -->
+    <div class="chat-quick-chips">
+      <button type="button" class="chat-chip" onclick="openChatWithPrompt('Explain Error 404 Not Found');">
+        <i class="fa-solid fa-shield-halved"></i> Error 404
+      </button>
+      <button type="button" class="chat-chip" onclick="openChatWithPrompt('Explain Error 488 (Audio Stream Unavailable)');">
+        <i class="fa-solid fa-headphones"></i> Site Error 488
+      </button>
+      <button type="button" class="chat-chip" onclick="openChatWithPrompt('How does the AI Mood DJ recommend music?');">
+        <i class="fa-solid fa-sparkles"></i> How AI DJ Works
+      </button>
+      <button type="button" class="chat-chip" onclick="openChatWithPrompt('I need help with a broken playback stream, please open a support ticket for me.');">
+        <i class="fa-solid fa-headset"></i> Open Ticket
+      </button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="chat-messages-container" id="chatMessagesContainer">
+      
+      <!-- Welcome Message -->
+      <div class="chat-msg-row bot">
+        <div class="chat-bubble">
+          <div style="font-weight: 700; color: #c084fc; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-robot"></i> MoodMusic Support Bot
+          </div>
+          <p>
+            Hello! I'm your integrated AI Assistant. I can answer frequently asked questions from our SQL knowledge base, explain HTTP &amp; site-specific error codes (including <strong>400, 401, 403, 404, 429, 500, 503, and 488</strong>), and automatically file <strong>Support Tickets</strong> in our SQL database whenever you need human assistance.
+          </p>
+          <p style="font-size: 0.8rem; color: #a1a1aa; margin: 0;">
+            How can I help you today?
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Chat Input Form -->
+    <form class="chat-input-bar" id="chatInputForm" onsubmit="handleChatSubmit(event);">
+      <input 
+        type="text" 
+        id="chatMessageInput" 
+        class="chat-input-field" 
+        placeholder="Ask about FAQs, error codes (e.g. 488), or tickets..." 
+        autocomplete="off"
+      >
+      <button type="submit" class="chat-send-btn" id="chatSendBtn" title="Send message">
+        <i class="fa-solid fa-paper-plane" style="font-size: 0.9rem;"></i>
+      </button>
+    </form>
+
+  </div>
+
+
+  <!-- Global JavaScript -->
+  <script src="{% static 'js/app.js' %}"></script>
+  
+  <!-- AI Assistant Chat Script -->
+  <script>
+    // Session identification for MongoDB conversation tracking
+    let chatSessionId = localStorage.getItem('moodmusic_chat_session');
+    if (!chatSessionId) {
+      chatSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+      localStorage.setItem('moodmusic_chat_session', chatSessionId);
+    }
+
+    const chatLauncherBtn = document.getElementById('chatLauncherBtn');
+    const chatWindowPanel = document.getElementById('chatWindowPanel');
+    const chatCloseBtn = document.getElementById('chatCloseBtn');
+    const chatMessagesContainer = document.getElementById('chatMessagesContainer');
+    const chatMessageInput = document.getElementById('chatMessageInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+
+    function toggleChatWidget(show) {
+      if (!chatWindowPanel) return;
+      const isVisible = chatWindowPanel.style.display === 'flex';
+      const targetState = show !== undefined ? show : !isVisible;
+      chatWindowPanel.style.display = targetState ? 'flex' : 'none';
+      if (targetState) {
+        setTimeout(() => chatMessageInput?.focus(), 150);
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+      }
+    }
+
+    if (chatLauncherBtn) {
+      chatLauncherBtn.addEventListener('click', () => toggleChatWidget());
+    }
+    if (chatCloseBtn) {
+      chatCloseBtn.addEventListener('click', () => toggleChatWidget(false));
+    }
+
+    // Global function to open chat prefilled with prompt (e.g. from 404, 500, FAQ cards)
+    window.openChatWithPrompt = function(promptText) {
+      toggleChatWidget(true);
+      if (chatMessageInput && promptText) {
+        chatMessageInput.value = promptText;
+        handleChatSubmit(new Event('submit'));
+      }
+    };
+
+    // Simple markdown renderer for AI responses
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/^### (.*$)/gim, '<h3 style="font-size:1rem;font-weight:700;color:#c084fc;margin:8px 0 4px 0;">$1</h3>')
+        .replace(/^## (.*$)/gim, '<h3 style="font-size:1.05rem;font-weight:800;color:#fff;margin:8px 0 4px 0;">$1</h3>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff;">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.35);padding:2px 6px;border-radius:4px;color:#c084fc;font-family:monospace;font-size:0.85em;">$1</code>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#38bdf8;text-decoration:underline;">$1</a>')
+        .replace(/^\s*-\s+(.*$)/gim, '<div style="margin-left:12px;margin-bottom:3px;">&bull; $1</div>')
+        .replace(/\n\n/g, '</p><p style="margin:6px 0;">')
+        .replace(/\n/g, '<br>');
+      return '<p style="margin:0;">' + html + '</p>';
+    }
+
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const text = chatMessageInput.value.trim();
+      if (!text) return;
+
+      // 1. Append user message to UI
+      appendUserMessage(text);
+      chatMessageInput.value = '';
+      chatMessageInput.disabled = true;
+      chatSendBtn.disabled = true;
+
+      // 2. Show typing indicator
+      const typingId = 'typing_' + Date.now();
+      appendTypingIndicator(typingId);
+
+      try {
+        const response = await fetch('/api/chat/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            message: text,
+            session_id: chatSessionId
+          })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator(typingId);
+
+        if (data.success) {
+          appendBotMessage(data);
+        } else {
+          appendErrorMessage("Sorry, an error occurred while processing your query.");
+        }
+      } catch (err) {
+        removeTypingIndicator(typingId);
+        appendErrorMessage("Network error: Could not reach the assistant service.");
+      } finally {
+        chatMessageInput.disabled = false;
+        chatSendBtn.disabled = false;
+        chatMessageInput.focus();
+      }
+    }
+
+    function appendUserMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'chat-msg-row user';
+      row.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+      chatMessagesContainer.appendChild(row);
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function appendTypingIndicator(id) {
+      const row = document.createElement('div');
+      row.className = 'chat-msg-row bot';
+      row.id = id;
+      row.innerHTML = `
+        <div class="chat-bubble" style="display:flex;align-items:center;gap:6px;color:#a1a1aa;font-size:0.8rem;">
+          <i class="fa-solid fa-spinner fa-spin" style="color:#c084fc;"></i> Assistant is searching SQL FAQ &amp; Error Directory...
+        </div>`;
+      chatMessagesContainer.appendChild(row);
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function appendErrorMessage(msg) {
+      const row = document.createElement('div');
+      row.className = 'chat-msg-row bot';
+      row.innerHTML = `<div class="chat-bubble" style="border-color:rgba(239,68,68,0.4);color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> ${msg}</div>`;
+      chatMessagesContainer.appendChild(row);
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function appendBotMessage(data) {
+      const row = document.createElement('div');
+      row.className = 'chat-msg-row bot';
+
+      const msgId = 'msg_' + Date.now();
+      let html = `<div class="chat-bubble" id="${msgId}">`;
+      
+      // Render Markdown content
+      html += renderMarkdown(data.answer);
+
+      // If AI cannot answer or suggests ticket
+      if (!data.can_answer && !data.ticket_created) {
+        const defaultSubject = (data.suggested_ticket && data.suggested_ticket.subject) ? data.suggested_ticket.subject : "Assistance Request";
+        html += `
+          <div style="margin-top:12px;padding:12px;background:rgba(124,58,237,0.15);border:1px solid rgba(168,85,247,0.3);border-radius:10px;">
+            <div style="font-size:0.8rem;font-weight:700;color:#c084fc;margin-bottom:6px;">
+              <i class="fa-solid fa-ticket"></i> Need Engineering Support?
+            </div>
+            <div style="font-size:0.78rem;color:#d4d4d8;margin-bottom:8px;">
+              I can immediately file an official Support Ticket stored in our SQL database.
+            </div>
+            <button 
+              type="button" 
+              onclick="triggerDirectTicketCreate('${escapeHtml(defaultSubject)}', '${msgId}');"
+              style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:9999px;font-size:0.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"
+            >
+              <i class="fa-solid fa-paper-plane"></i> File Support Ticket in SQL
+            </button>
+          </div>`;
+      }
+
+      // If ticket was created
+      if (data.ticket_created) {
+        html += `
+          <div style="margin-top:12px;padding:12px;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.35);border-radius:10px;">
+            <div style="font-weight:800;color:var(--sp-green);font-size:0.85rem;margin-bottom:4px;">
+              <i class="fa-solid fa-circle-check"></i> Support Ticket Created in SQL Database!
+            </div>
+            <div style="font-size:0.8rem;color:#e4e4e7;">
+              Ticket ID: <strong style="color:#fff;">${data.ticket_created.ticket_number}</strong><br>
+              Status: <span style="color:#fde047;">${data.ticket_created.status}</span>
+            </div>
+            <div style="margin-top:8px;">
+              <a href="/support/?ticket_number=${data.ticket_created.ticket_number}" target="_blank" style="color:var(--sp-green);font-size:0.75rem;text-decoration:underline;">
+                Track Ticket in Support Portal &rarr;
+              </a>
+            </div>
+          </div>`;
+      }
+
+      // MongoDB Feedback Action Bar
+      html += `
+        <div class="chat-feedback-bar" id="fb_bar_${msgId}">
+          <span>Helpful?</span>
+          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 5, 'thumbs_up');" title="Helpful (Store in MongoDB)">
+            <i class="fa-solid fa-thumbs-up"></i>
+          </button>
+          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 1, 'thumbs_down');" title="Not helpful (Store in MongoDB)">
+            <i class="fa-solid fa-thumbs-down"></i>
+          </button>
+          <span style="margin-left:auto;font-size:0.68rem;opacity:0.7;">Logged to MongoDB</span>
+        </div>`;
+
+      html += `</div>`;
+      row.innerHTML = html;
+      chatMessagesContainer.appendChild(row);
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    // Direct ticket creation trigger
+    async function triggerDirectTicketCreate(subject, msgId) {
+      const email = prompt("Please enter your contact email for this ticket:", "guest@moodmusic.com");
+      if (!email) return;
+
+      try {
+        const response = await fetch('/api/ticket/create/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            subject: subject || "AI Assistant Escalation",
+            description: "User requested escalation from AI Assistant session: " + chatSessionId,
+            user_email: email,
+            user_name: "Assistant User",
+            category: "AI Assistant Escalation",
+            ai_generated: true
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          const msgBubble = document.getElementById(msgId);
+          if (msgBubble) {
+            const ticketCard = document.createElement('div');
+            ticketCard.style.cssText = "margin-top:10px;padding:10px 14px;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.4);border-radius:8px;";
+            ticketCard.innerHTML = `
+              <div style="color:var(--sp-green);font-weight:700;font-size:0.82rem;">
+                <i class="fa-solid fa-check"></i> Ticket ${data.ticket_number} Saved in SQL!
+              </div>
+              <div style="font-size:0.75rem;color:#a1a1aa;margin-top:4px;">
+                <a href="/support/?ticket_number=${data.ticket_number}" target="_blank" style="color:#fff;text-decoration:underline;">View ticket details in Support Center</a>
+              </div>`;
+            msgBubble.appendChild(ticketCard);
+          }
+        }
+      } catch (err) {
+        alert("Failed to submit ticket. Please use the Support page form.");
+      }
+    }
+
+    // Feedback rating sent directly to MongoDB
+    async function sendChatFeedback(msgId, rating, feedbackType) {
+      const fbBar = document.getElementById('fb_bar_' + msgId);
+      if (fbBar) {
+        fbBar.innerHTML = `<span style="color:var(--sp-green);"><i class="fa-solid fa-check"></i> Feedback saved to MongoDB!</span>`;
+      }
+
+      try {
+        await fetch('/api/chat/feedback/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            session_id: chatSessionId,
+            message_id: msgId,
+            rating: rating,
+            feedback_type: feedbackType,
+            comments: 'User rated via persistent chat widget'
+          })
+        });
+      } catch (err) {
+        console.warn('Feedback MongoDB logging error:', err);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>

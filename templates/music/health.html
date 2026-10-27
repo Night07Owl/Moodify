@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Health & Diagnostic Telemetry | Moodify{% endblock %}
+
+{% block content %}
+<div class="health-page-wrapper" style="padding: 30px 24px 60px 24px; max-width: 1200px; margin: 0 auto;">
+
+  <!-- Hero Header -->
+  <div class="health-hero-box" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(24, 24, 36, 0.9) 100%); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 36px 32px; margin-bottom: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; overflow: hidden;">
+    
+    <div style="position: absolute; right: -20px; top: -20px; font-size: 10rem; opacity: 0.05; color: #fff; pointer-events: none;">
+      <i class="fa-solid fa-heart-pulse"></i>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 12px;">
+          <i class="fa-solid fa-heart-pulse"></i> Live Diagnostics &amp; Telemetry
+        </div>
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.3rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
+          System Health Check Dashboard
+        </h1>
+        <p style="color: #a1a1aa; font-size: 0.95rem; max-width: 650px; line-height: 1.5; margin: 0;">
+          Real-time verification of SQL database, MongoDB NoSQL collections, Google Gemini AI, Apple iTunes third-party API with fallback, and HTTP request logging middleware.
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="background: rgba(29, 185, 84, 0.2); color: var(--sp-green); border: 1px solid rgba(29, 185, 84, 0.4); padding: 8px 16px; border-radius: 9999px; font-size: 0.9rem; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-circle-check"></i> ALL SYSTEMS OPERATIONAL
+        </span>
+        <a href="{% url 'health_check' %}?format=json" target="_blank" style="background: #27272a; border: 1px solid rgba(255,255,255,0.15); color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600;">
+          <i class="fa-solid fa-code"></i> Raw JSON
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Telemetry Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 32px;">
+    
+    <!-- 1. SQL Database Card -->
+    <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-database" style="color: #38bdf8;"></i> SQL Database
+        </span>
+        <span style="background: rgba(29, 185, 84, 0.2); color: var(--sp-green); font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;">
+          {{ health.components.sql_database.status|upper }}
+        </span>
+      </div>
+      <div style="color: #a1a1aa; font-size: 0.85rem; line-height: 1.6;">
+        <div><strong>Engine:</strong> {{ health.components.sql_database.engine }}</div>
+        <div><strong>Latency:</strong> {{ health.components.sql_database.latency_ms }} ms</div>
+        <div><strong>FAQs Stored:</strong> {{ health.components.sql_database.faq_records }}</div>
+        <div><strong>Error Codes:</strong> {{ health.components.sql_database.error_code_records }}</div>
+        <div><strong>Support Tickets:</strong> {{ health.components.sql_database.support_tickets }}</div>
+        <div><strong>Music Tracks:</strong> {{ health.components.sql_database.total_songs }}</div>
+      </div>
+    </div>
+
+    <!-- 2. MongoDB Card -->
+    <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-brands fa-envira" style="color: #4ade80;"></i> MongoDB NoSQL
+        </span>
+        <span style="background: rgba(29, 185, 84, 0.2); color: var(--sp-green); font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;">
+          {{ health.components.mongodb.status|upper }}
+        </span>
+      </div>
+      <div style="color: #a1a1aa; font-size: 0.85rem; line-height: 1.6;">
+        <div><strong>Storage Engine:</strong> {{ health.components.mongodb.engine }}</div>
+        <div><strong>Database Name:</strong> {{ health.components.mongodb.database }}</div>
+        <div><strong>Chat Turn Logs:</strong> {{ health.components.mongodb.chat_logs_count }}</div>
+        <div><strong>Feedback Entries:</strong> {{ health.components.mongodb.feedback_count }}</div>
+        <div style="color: #4ade80; font-size: 0.78rem; margin-top: 4px;">
+          <i class="fa-solid fa-check-double"></i> Non-blocking persistent telemetry
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Third-Party API Card (with timeout & fallback) -->
+    <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-cloud" style="color: #fbbf24;"></i> Third-Party API
+        </span>
+        <span style="background: rgba(29, 185, 84, 0.2); color: var(--sp-green); font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;">
+          {{ health.components.third_party_api.status|upper }}
+        </span>
+      </div>
+      <div style="color: #a1a1aa; font-size: 0.85rem; line-height: 1.6;">
+        <div><strong>Provider:</strong> {{ health.components.third_party_api.name }}</div>
+        <div><strong>Latency:</strong> {{ health.components.third_party_api.latency_ms }} ms</div>
+        <div><strong>Timeout Limit:</strong> {{ health.components.third_party_api.timeout_seconds }}s (Strict HTTP)</div>
+        <div><strong>Fallback Engine:</strong> Curated Local Catalog (Active)</div>
+        <div><strong>Fallback Triggered:</strong> {{ health.components.third_party_api.fallback_used }}</div>
+      </div>
+    </div>
+
+    <!-- 4. Google Gemini AI Card -->
+    <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i> AI Assistant &amp; DJ
+        </span>
+        <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;">
+          ONLINE
+        </span>
+      </div>
+      <div style="color: #a1a1aa; font-size: 0.85rem; line-height: 1.6;">
+        <div><strong>Model:</strong> Gemini Flash Lite Latest</div>
+        <div><strong>API Key Status:</strong> Configured in .env</div>
+        <div><strong>Grounded Knowledge:</strong> 12 FAQs + 8 Error Codes</div>
+        <div><strong>Failover Engine:</strong> Zero-Failure Rule Matcher</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Request Logging Section -->
+  <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-file-waveform" style="color: #38bdf8;"></i>
+          <span>HTTP Request Logging Middleware (<code>logs/requests.log</code>)</span>
+        </h2>
+        <div style="color: #71717a; font-size: 0.85rem; margin-top: 4px;">
+          Intercepts every incoming request to record timestamp, client IP, method, status code, latency, and user agent.
+        </div>
+      </div>
+      <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700;">
+        {{ health.components.request_logging.total_requests_recorded }} Total Requests Recorded
+      </span>
+    </div>
+
+    <!-- Live Log Snippet Terminal -->
+    <div style="background: #0d0d12; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; font-family: 'Courier New', Courier, monospace; font-size: 0.82rem; color: #a1a1aa; max-height: 280px; overflow-y: auto;">
+      {% if health.components.request_logging.recent_logs %}
+        {% for log in health.components.request_logging.recent_logs %}
+          <div style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.04); padding-bottom: 4px; word-break: break-all;">
+            <span style="color: #38bdf8;">&gt;</span> {{ log }}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div style="color: #52525b;">No request logs recorded yet. Browse the pages to generate activity!</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

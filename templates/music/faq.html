@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQ & Error Codes Knowledge Base | Moodify{% endblock %}
+
+{% block content %}
+<div class="faq-page-wrapper" style="padding: 30px 24px 60px 24px; max-width: 1200px; margin: 0 auto;">
+
+  <!-- Hero Header -->
+  <div class="faq-hero-box" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(24, 24, 36, 0.9) 100%); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 20px; padding: 40px 32px; margin-bottom: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; overflow: hidden;">
+    
+    <div style="position: absolute; right: -20px; top: -20px; font-size: 10rem; opacity: 0.05; color: #fff; pointer-events: none;">
+      <i class="fa-solid fa-circle-question"></i>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px; position: relative; z-index: 2;">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; color: #c084fc; margin-bottom: 12px;">
+          <i class="fa-solid fa-database"></i> SQL Relational Database Grounding
+        </div>
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
+          Help Center &amp; Technical Reference
+        </h1>
+        <p style="color: #a1a1aa; font-size: 1rem; max-width: 650px; line-height: 1.5; margin: 0;">
+          Browse our official FAQ repository and comprehensive HTTP/application error code specifications. All {{ faq_count }} FAQs and {{ error_code_count }} Error Codes are stored in our SQL database and feed our AI Support Assistant.
+        </p>
+      </div>
+
+      <!-- Quick Ask Assistant CTA -->
+      <div>
+        <button 
+          type="button" 
+          onclick="openChatWithPrompt('Hello! Can you help me understand how MoodMusic works and what error codes exist?');"
+          style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 12px 22px; border-radius: 9999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); transition: transform 0.2s;"
+          onmouseover="this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.transform='none';"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Ask AI Assistant</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <form action="{% url 'faq' %}" method="GET" style="margin-top: 28px; display: flex; gap: 10px; max-width: 600px;">
+      <div style="position: relative; flex: 1;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #71717a;"></i>
+        <input 
+          type="text" 
+          name="q" 
+          placeholder="Search FAQs, keywords, or error codes (e.g. 404, 488, playback)..." 
+          value="{{ search_q }}"
+          style="width: 100%; background: #121218; border: 1px solid rgba(255,255,255,0.15); border-radius: 9999px; padding: 12px 18px 12px 42px; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+          onfocus="this.style.borderColor='#a855f7';"
+          onblur="this.style.borderColor='rgba(255,255,255,0.15)';"
+        >
+      </div>
+      <button 
+        type="submit" 
+        style="background: #27272a; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 9999px; padding: 0 20px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+        onmouseover="this.style.background='#3f3f46';"
+        onmouseout="this.style.background='#27272a';"
+      >
+        Search
+      </button>
+      {% if search_q %}
+        <a href="{% url 'faq' %}" style="background: transparent; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 12px 16px; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center;">
+          Clear
+        </a>
+      {% endif %}
+    </form>
+
+  </div>
+
+  <!-- Page Sections Nav Tabs -->
+  <div style="display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; flex-wrap: wrap;">
+    <a href="#faqs-section" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-list-check"></i> Frequently Asked Questions ({{ faq_count }})
+    </a>
+    <a href="#error-codes-section" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-shield-halved"></i> Error Code Directory ({{ error_code_count }})
+    </a>
+    <a href="{% url 'support' %}" style="background: #27272a; border: 1px solid rgba(255,255,255,0.1); color: #e4e4e7; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; margin-left: auto;">
+      <i class="fa-solid fa-headset"></i> Support Tickets Portal &rarr;
+    </a>
+  </div>
+
+  <!-- Category Filters for FAQs -->
+  <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+    <a href="{% url 'faq' %}#faqs-section" class="category-pill {% if not selected_category or selected_category == 'All' %}active{% endif %}" style="padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.12); color: #a1a1aa; background: #181824;">
+      All FAQs
+    </a>
+    {% for cat in categories %}
+      <a href="{% url 'faq' %}?category={{ cat|urlencode }}#faqs-section" class="category-pill {% if selected_category == cat %}active{% endif %}" style="padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-decoration: none; border: 1px solid {% if selected_category == cat %}#a855f7{% else %}rgba(255,255,255,0.12){% endif %}; color: {% if selected_category == cat %}#fff{% else %}#a1a1aa{% endif %}; background: {% if selected_category == cat %}rgba(168, 85, 247, 0.25){% else %}#181824{% endif %};">
+        {{ cat }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- SECTION 1: FAQs (Stored in SQL) -->
+  <section id="faqs-section" style="margin-bottom: 56px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-circle-question" style="color: #c084fc;"></i>
+        <span>Frequently Asked Questions</span>
+      </h2>
+      <span style="font-size: 0.85rem; color: #71717a;">Showing {{ faqs|length }} of {{ faq_count }} items</span>
+    </div>
+
+    {% if faqs %}
+      <div style="display: grid; gap: 16px;">
+        {% for faq in faqs %}
+          <div class="faq-item-card" style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px 24px; transition: border-color 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; line-height: 1.4;">
+                <span style="color: #a855f7; margin-right: 6px;">#{{ faq.order }}</span> {{ faq.question }}
+              </h3>
+              <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; white-space: nowrap;">
+                {{ faq.category }}
+              </span>
+            </div>
+
+            <p style="color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 16px 0;">
+              {{ faq.answer }}
+            </p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
+              <span style="font-size: 0.75rem; color: #52525b;">
+                <i class="fa-solid fa-database"></i> SQL ID: <code>FAQ_{{ faq.id }}</code>
+              </span>
+              <button 
+                type="button" 
+                onclick="openChatWithPrompt('{{ faq.question|escapejs }}');"
+                style="background: transparent; border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 9999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(168, 85, 247, 0.15)';"
+                onmouseout="this.style.background='transparent';"
+              >
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Ask Assistant about this
+              </button>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: #181824; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 40px; text-align: center; color: #71717a;">
+        <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 12px;"></i>
+        <p>No FAQs matched your search term "{{ search_q }}".</p>
+        <a href="{% url 'faq' %}" style="color: #a855f7; text-decoration: underline;">View all FAQs</a>
+      </div>
+    {% endif %}
+  </section>
+
+
+  <!-- SECTION 2: 8 Error Codes Reference (400, 401, 403, 404, 429, 500, 503, 488) -->
+  <section id="error-codes-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <i class="fa-solid fa-shield-halved" style="color: #f87171;"></i>
+          <span>Official Error Code Directory</span>
+        </h2>
+        <p style="color: #71717a; font-size: 0.88rem; margin: 0;">
+          Minimum 8 error codes cataloged in SQL: 400, 401, 403, 404, 429, 500, 503, and site-specific 488.
+        </p>
+      </div>
+      <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
+        {{ error_codes|length }} Error Codes Active
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px;">
+      {% for err in error_codes %}
+        <div class="error-code-card" style="background: #181824; border: 1px solid {% if err.is_site_specific %}rgba(168, 85, 247, 0.45){% else %}rgba(255,255,255,0.08){% endif %}; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,0.25); position: relative; overflow: hidden;">
+          
+          {% if err.is_site_specific %}
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 12px; border-bottom-left-radius: 8px; letter-spacing: 0.08em; text-transform: uppercase;">
+              Site-Specific Code
+            </div>
+          {% endif %}
+
+          <div>
+            <!-- Header: Code + Name -->
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+              <span style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: {% if err.is_site_specific %}#c084fc{% elif err.category == 'Server Error' %}#f87171{% else %}#fbbf24{% endif %};">
+                {{ err.code }}
+              </span>
+              <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0;">{{ err.name }}</h3>
+                <span style="font-size: 0.72rem; color: #71717a; text-transform: uppercase; font-weight: 600;">{{ err.category }}</span>
+              </div>
+            </div>
+
+            <!-- Meaning -->
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Definition &amp; Meaning:</div>
+              <p style="color: #d4d4d8; font-size: 0.88rem; line-height: 1.5; margin: 0;">{{ err.meaning }}</p>
+            </div>
+
+            <!-- Common Causes -->
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Common Causes:</div>
+              <p style="color: #a1a1aa; font-size: 0.84rem; line-height: 1.4; margin: 0;">{{ err.common_causes }}</p>
+            </div>
+
+            <!-- Troubleshooting Steps -->
+            <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 4px;">
+                <i class="fa-solid fa-wrench"></i> Resolution:
+              </div>
+              <p style="color: #e4e4e7; font-size: 0.82rem; line-height: 1.4; white-space: pre-line; margin: 0;">{{ err.troubleshooting_steps }}</p>
+            </div>
+          </div>
+
+          <!-- Card Footer: Ask AI -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
+            {% if err.code == 404 %}
+              <a href="{% url 'test_404' %}" style="font-size: 0.78rem; color: #a1a1aa; text-decoration: none;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Test 404 Page
+              </a>
+            {% elif err.code == 500 %}
+              <a href="{% url 'test_500' %}" style="font-size: 0.78rem; color: #a1a1aa; text-decoration: none;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Test 500 Page
+              </a>
+            {% else %}
+              <span style="font-size: 0.75rem; color: #52525b;">SQL Stored</span>
+            {% endif %}
+
+            <button 
+              type="button" 
+              onclick="openChatWithPrompt('Explain error code {{ err.code }} ({{ err.name|escapejs }}) and what steps I should take.');"
+              style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 700; padding: 5px 12px; border-radius: 9999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;"
+              onmouseover="this.style.background='rgba(168, 85, 247, 0.3)';"
+              onmouseout="this.style.background='rgba(168, 85, 247, 0.15)';"
+            >
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Ask AI to Explain
+            </button>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+
+  </section>
+
+</div>
+{% endblock %}
