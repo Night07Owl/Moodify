@@ -15,7 +15,7 @@
 | Item | Details |
 | :--- | :--- |
 | **Individual Task Title** | **Moodify: AI-Driven Ambient Music Platform & Interactive Support Assistant** |
-| **Live Website Link (HTTPS)** | [https://moodify-production.up.railway.app](https://moodify-production.up.railway.app) *(or your deployed HTTPS URL on Render/Railway/PythonAnywhere)* |
+| **Live Website Link (HTTPS)** | [https://moodify-production.up.railway.app]([https://moodify-production.up.railway.app](https://moodify-spf8.onrender.com/)) |
 | **GitHub Repository Link** | [https://github.com/Night07Owl/Moodify](https://github.com/Night07Owl/Moodify) |
 | **Task Sheet Reference** | [Software Development Final Assessment Sheet](https://docs.google.com/spreadsheets/d/1gac3qN_sFgbBQR7utv6N-66-C8szNq3-F6L7NQsbx78/edit?usp=sharing) |
 
