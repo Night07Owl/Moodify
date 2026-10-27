@@ -44,6 +44,7 @@ db.sqlite3-journal
 media/audio_previews/
 
 # IDE & OS
+staticfiles/
 .vscode/
 .idea/
 .DS_Store
