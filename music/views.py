@@ -11,7 +11,6 @@ import json
 from datetime import datetime
 from django.conf import settings
 from .models import Mood, Song, Favorite, FAQ, ErrorCode, SupportTicket
-from .forms import UserRegisterForm, UserLoginForm
 from . import ai_assistant
 from . import mongo_service
 from .itunes_service import search_itunes_track
@@ -231,71 +230,6 @@ def favorites_list(request):
     return render(request, 'music/favorites.html', context)
 
 
-def signup_view(request):
-    """
-    No sign up required: immediately redirects to home.
-    """
-    return redirect('home')
-
-
-def login_view(request):
-    """
-    No log in required: immediately redirects to home.
-    """
-    return redirect('home')
-
-
-def logout_view(request):
-    """
-    Clears any existing session and redirects to home.
-    """
-    logout(request)
-    return redirect('home')
-
-
-def profile_view(request):
-    """
-    Displays listening statistics and AI persona based on saved Liked Songs.
-    No login required.
-    """
-    fav_ids = get_user_favorite_ids(request)
-    saved_songs = Song.objects.filter(id__in=fav_ids).select_related('mood')
-    total_favorites = saved_songs.count()
-
-    # Calculate top mood based on saved favorites
-    mood_counts = (
-        saved_songs.values('mood__name', 'mood__slug', 'mood__accent_color')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
-
-    top_mood = mood_counts.first() if mood_counts.exists() else None
-    recent_favorites = saved_songs.order_by('-created_at')[:6]
-
-    # AI Listener Persona synthesis
-    ai_persona_titles = {
-        'Happy': ('The Solar Radiator', 'Your listening patterns show high optimism, sunny dispositions, and a love for uplifting pop anthems.'),
-        'Chill': ('The Lofi Alchemist', 'You use music as an anchor for inner peace, relaxation, and mindful decompression.'),
-        'Energetic': ('The High-Voltage Dynamo', 'Your playlist is pure fuel—powering intense workouts, relentless drive, and breakthrough momentum.'),
-        'Romantic': ('The Velvet Dreamer', 'You are drawn to intimate harmonies, heartfelt devotions, and warm emotional connection.'),
-        'Focus': ('The Deep-Flow Architect', 'Minimal distractions, maximum cognition. You harness binaural rhythms and ambient textures to execute deep work.'),
-        'Sad': ('The Soulful Contemplator', 'You appreciate poignant acoustic melancholy and cathartic melodies that give voice to deep emotions.')
-    }
-    
-    top_mood_name = top_mood['mood__name'] if top_mood else 'Chill'
-    persona_title, persona_desc = ai_persona_titles.get(top_mood_name, ('The Eclectic Explorer', 'You curate a balanced frequency across all moods.'))
-
-    context = {
-        'total_favorites': total_favorites,
-        'mood_counts': mood_counts,
-        'top_mood': top_mood,
-        'recent_favorites': recent_favorites,
-        'ai_persona_title': persona_title,
-        'ai_persona_desc': persona_desc,
-    }
-    return render(request, 'music/profile.html', context)
-
-
 @csrf_exempt
 @require_POST
 def ai_mood_dj(request):
@@ -471,15 +405,6 @@ def ai_generate_song(request):
         })
 
     return redirect('song_detail', song_id=new_song.id)
-
-
-@csrf_exempt
-@require_POST
-def import_spotify_song(request):
-    """
-    Backwards compatibility: redirects track additions to AI generation.
-    """
-    return ai_generate_song(request)
 
 
 # ============================================================================

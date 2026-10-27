@@ -33,11 +33,5 @@ urlpatterns = [
     # AI DJ & Track Generation
     path('ai/dj/', views.ai_mood_dj, name='ai_mood_dj'),
     path('ai/generate/', views.ai_generate_song, name='ai_generate_song'),
-    path('spotify/import/', views.import_spotify_song, name='import_spotify_song'),
-
-    # User Authentication & Profile
-    path('signup/', views.signup_view, name='signup'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('profile/', views.profile_view, name='profile'),
 ]
+
