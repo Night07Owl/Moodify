@@ -27,10 +27,10 @@ class Command(BaseCommand):
                 "answer": "The AI DJ uses Google's latest Gemini Generative AI models combined with an iTunes Search API fallback. It analyzes the emotional intent, tempo, and genre cues of your prompt (e.g., 'calm late night coding with lo-fi beats') to calculate energy scores and curate tracks that fit your state."
             },
             {
-                "question": "How can I add or generate new songs using AI?",
+                "question": "How can I add, generate songs, or create new music using AI?",
                 "category": "AI Assistant",
                 "order": 4,
-                "answer": "Click the 'AI Song Studio' button in the top navigation or sidebar. Type any artist name, song title, or emotional vibe (e.g., 'Taylor Swift upbeat pop' or 'energetic EDM workout'). The Gemini AI and iTunes API will find real tracks, fetch high-resolution album artwork, download preview audio, and add it directly to your library."
+                "answer": "Click the 'AI Song Studio' button in the top navigation or sidebar. You can generate songs, create new music, or discover tracks by typing any artist name, song title, or emotional vibe (e.g., 'Taylor Swift upbeat pop' or 'energetic EDM workout'). The AI and search engine will find the song, fetch high-resolution album artwork, load preview audio, and add it directly to your library."
             },
             {
                 "question": "Can I preview and play music directly in the browser?",

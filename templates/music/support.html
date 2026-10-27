@@ -15,14 +15,11 @@
 
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px; position: relative; z-index: 2;">
       <div>
-        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(29, 185, 84, 0.2); border: 1px solid rgba(29, 185, 84, 0.4); padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; color: var(--sp-green); margin-bottom: 12px;">
-          <i class="fa-solid fa-database"></i> SQL Relational Support Ticket Persistence
-        </div>
         <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
           Support Ticket Center
         </h1>
         <p style="color: #a1a1aa; font-size: 1rem; max-width: 650px; line-height: 1.5; margin: 0;">
-          Submit and track customer service inquiries and technical error reports. When our AI Assistant cannot resolve your question, it automatically files a support ticket stored in SQLite SQL.
+          Submit and track customer service inquiries and technical error reports. Our team is here to assist you.
         </p>
       </div>
 
@@ -42,7 +39,7 @@
     <!-- Stat Badges -->
     <div style="display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap;">
       <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 20px;">
-        <div style="font-size: 0.75rem; color: #71717a; text-transform: uppercase; font-weight: 700;">Total SQL Tickets</div>
+        <div style="font-size: 0.75rem; color: #71717a; text-transform: uppercase; font-weight: 700;">Total Tickets</div>
         <div style="font-size: 1.5rem; font-weight: 900; color: #fff; font-family: 'Outfit', sans-serif;">{{ total_tickets }}</div>
       </div>
       <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 12px; padding: 12px 20px;">
@@ -111,7 +108,7 @@
           </div>
         {% else %}
           <div style="color: #f87171; font-size: 0.9rem;">
-            <i class="fa-solid fa-circle-exclamation"></i> No ticket found with ID <code>{{ search_ticket_query }}</code> in SQL database.
+            <i class="fa-solid fa-circle-exclamation"></i> No ticket found with ID <code>{{ search_ticket_query }}</code>.
           </div>
         {% endif %}
       </div>
@@ -128,7 +125,7 @@
         <span>Create a Support Ticket</span>
       </h2>
       <p style="color: #71717a; font-size: 0.85rem; margin-bottom: 20px;">
-        All tickets are stored directly in SQLite and processed by our development team.
+        Our team reviews and processes all inquiries promptly.
       </p>
 
       <form action="{% url 'support' %}" method="POST">
@@ -209,7 +206,7 @@
           onmouseover="this.style.transform='scale(1.02)';"
           onmouseout="this.style.transform='none';"
         >
-          <i class="fa-solid fa-paper-plane"></i> Submit Ticket into SQL Database
+          <i class="fa-solid fa-paper-plane"></i> Submit Support Ticket
         </button>
       </form>
     </div>
@@ -219,7 +216,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i>
-          <span>Recent SQL Tickets</span>
+          <span>Recent Tickets</span>
         </h2>
         <span style="font-size: 0.75rem; color: #71717a;">Auto-synced</span>
       </div>

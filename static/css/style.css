@@ -1359,50 +1359,206 @@ button {
 }
 
 /* ==========================================================================
-   Responsive Rules
+   Responsive & Mobile Rules (Authentic Spotify Mobile Architecture)
    ========================================================================== */
-@media (max-width: 900px) {
-  .spotify-app {
-    grid-template-columns: 80px 1fr;
-  }
-  .sidebar-brand span,
-  .sidebar-nav-item span,
-  .library-title span,
-  .playlist-meta {
-    display: none;
-  }
-  .sidebar-box {
-    padding: 12px 8px;
-    align-items: center;
-  }
-  .sidebar-nav-item a {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .playlist-row-item {
-    justify-content: center;
-  }
-  .spotify-bottom-player {
-    grid-template-columns: 200px 1fr 180px;
-  }
+.spotify-mobile-nav {
+  display: none;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 768px) {
   .spotify-app {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr var(--player-height);
-    grid-template-areas:
-      "main"
-      "player";
+    display: block !important;
+    height: 100vh;
+    overflow: hidden;
   }
+
+  /* Hide desktop sidebar on mobile */
   .spotify-sidebar {
-    display: none;
+    display: none !important;
   }
+
+  /* Main wrapper fills viewport with bottom clearance for mini player and bottom nav */
+  .spotify-main-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .spotify-scrollable-content {
+    padding: 12px 14px 145px 14px !important;
+  }
+
+  /* Responsive Topbar */
+  .spotify-topbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .topbar-nav-arrows {
+    display: none !important;
+  }
+  .topbar-search-form {
+    max-width: 100%;
+    flex: 1;
+  }
+  .topbar-search-input {
+    font-size: 0.85rem;
+    padding: 8px 12px 8px 34px;
+  }
+  .btn-add-spotify {
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* Authentic Spotify Mobile Mini-Player Bar */
   .spotify-bottom-player {
-    grid-template-columns: 1fr auto;
+    position: fixed !important;
+    bottom: 58px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: calc(100% - 16px) !important;
+    height: 56px !important;
+    background: rgba(28, 28, 34, 0.96) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75) !important;
+    z-index: 1000 !important;
+  }
+
+  .player-left-col {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 65%;
+    overflow: hidden;
+  }
+  .player-track-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .player-track-info {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .player-track-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .player-track-artist {
+    font-size: 0.74rem;
+    color: var(--sp-text-subdued);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-center-col {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .player-timeline-row,
+  .sp-ctrl-icon {
+    display: none !important;
+  }
+  .sp-main-play-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
   }
   .player-right-col {
-    display: none;
+    display: none !important;
+  }
+
+  /* Spotify Mobile Bottom Navigation Bar */
+  .spotify-mobile-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 56px !important;
+    background: rgba(18, 18, 22, 0.98) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 1001 !important;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    color: var(--sp-text-subdued);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item i {
+    font-size: 1.15rem;
+  }
+
+  .mobile-nav-item:active,
+  .mobile-nav-item.active {
+    color: #fff;
+  }
+
+  .mobile-nav-item.active i {
+    color: var(--sp-green);
+  }
+
+  /* Floating Chat Launcher on Mobile */
+  .chat-launcher-btn {
+    bottom: 124px !important;
+    right: 14px !important;
+    padding: 6px 12px !important;
+    height: 38px !important;
+    font-size: 0.78rem !important;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6) !important;
+    z-index: 999 !important;
+  }
+
+  /* Chat Window Panel on Mobile - Full bottom sheet modal */
+  .chat-window-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 85vh !important;
+    max-height: 85vh !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    z-index: 2000 !important;
+  }
+
+  /* Support Grid on Mobile */
+  .support-page-wrapper div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 }
 

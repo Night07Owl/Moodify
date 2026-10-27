@@ -15,15 +15,9 @@
 
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px; position: relative; z-index: 2;">
       <div>
-        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; color: #c084fc; margin-bottom: 12px;">
-          <i class="fa-solid fa-database"></i> SQL Relational Database Grounding
-        </div>
-        <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
-          Help Center &amp; Technical Reference
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.02em;">
+          Help Center
         </h1>
-        <p style="color: #a1a1aa; font-size: 1rem; max-width: 650px; line-height: 1.5; margin: 0;">
-          Browse our official FAQ repository and comprehensive HTTP/application error code specifications. All {{ faq_count }} FAQs and {{ error_code_count }} Error Codes are stored in our SQL database and feed our AI Support Assistant.
-        </p>
       </div>
 
       <!-- Quick Ask Assistant CTA -->
@@ -127,7 +121,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
               <span style="font-size: 0.75rem; color: #52525b;">
-                <i class="fa-solid fa-database"></i> SQL ID: <code>FAQ_{{ faq.id }}</code>
+                Topic #{{ faq.order }}
               </span>
               <button 
                 type="button" 
@@ -162,7 +156,7 @@
           <span>Official Error Code Directory</span>
         </h2>
         <p style="color: #71717a; font-size: 0.88rem; margin: 0;">
-          Minimum 8 error codes cataloged in SQL: 400, 401, 403, 404, 429, 500, 503, and site-specific 488.
+          Common HTTP and platform status codes with troubleshooting steps.
         </p>
       </div>
       <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
@@ -224,7 +218,7 @@
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Test 500 Page
               </a>
             {% else %}
-              <span style="font-size: 0.75rem; color: #52525b;">SQL Stored</span>
+              <span style="font-size: 0.75rem; color: #52525b;">Standard Code</span>
             {% endif %}
 
             <button 

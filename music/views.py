@@ -429,17 +429,64 @@ def faq_view(request):
         faqs = faqs.filter(category=selected_category)
 
     if search_q:
-        faqs = faqs.filter(
+        # 1. Exact phrase match first
+        exact_faq_q = (
             Q(question__icontains=search_q) |
             Q(answer__icontains=search_q) |
             Q(category__icontains=search_q)
         )
-        error_codes = error_codes.filter(
+        exact_err_q = (
             Q(code__icontains=search_q) |
             Q(name__icontains=search_q) |
             Q(meaning__icontains=search_q) |
             Q(common_causes__icontains=search_q)
         )
+
+        # 2. Extract meaningful search tokens (ignoring conversational stop words)
+        stop_words = {'how', 'to', 'the', 'a', 'an', 'in', 'on', 'do', 'i', 'can', 'is', 'what', 'for', 'of', 'and', 'or', 'my', 'me', 'it', 'tell', 'about', 'with', 'by', 'does'}
+        tokens = [w for w in search_q.lower().split() if w not in stop_words]
+        if not tokens:
+            tokens = search_q.lower().split()
+
+        # Match where ALL non-stop tokens are present (highest relevance)
+        all_tokens_faq_q = Q()
+        for token in tokens:
+            all_tokens_faq_q &= (
+                Q(question__icontains=token) |
+                Q(answer__icontains=token) |
+                Q(category__icontains=token)
+            )
+
+        # Match where ANY non-stop token is present (broader recall)
+        any_tokens_faq_q = Q()
+        for token in tokens:
+            any_tokens_faq_q |= (
+                Q(question__icontains=token) |
+                Q(answer__icontains=token) |
+                Q(category__icontains=token)
+            )
+
+        primary_faqs = faqs.filter(exact_faq_q | all_tokens_faq_q).distinct()
+        if primary_faqs.exists():
+            faqs = primary_faqs
+        else:
+            faqs = faqs.filter(any_tokens_faq_q).distinct()
+
+        # Error codes matching
+        any_tokens_err_q = Q()
+        for token in tokens:
+            any_tokens_err_q |= (
+                Q(code__icontains=token) |
+                Q(name__icontains=token) |
+                Q(meaning__icontains=token) |
+                Q(common_causes__icontains=token)
+            )
+
+        primary_errs = error_codes.filter(exact_err_q).distinct()
+        if primary_errs.exists():
+            error_codes = primary_errs
+        else:
+            error_codes = error_codes.filter(any_tokens_err_q).distinct()
 
     categories = FAQ.objects.values_list('category', flat=True).distinct()
 

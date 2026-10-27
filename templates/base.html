@@ -288,6 +288,30 @@
 
     </footer>
 
+    <!-- Spotify Mobile Bottom Tab Navigation Bar (Visible only on mobile / small screens) -->
+    <nav class="spotify-mobile-nav" id="spotifyMobileNav">
+      <a href="{% url 'home' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'home' and not search_query %}active{% endif %}">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+      <a href="{% url 'home' %}?q=" class="mobile-nav-item {% if search_query %}active{% endif %}" onclick="if (window.location.pathname === '/') { event.preventDefault(); document.getElementById('mainSearchInput')?.focus(); window.scrollTo({top:0, behavior:'smooth'}); }">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Search</span>
+      </a>
+      <a href="{% url 'favorites_list' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'favorites_list' %}active{% endif %}">
+        <i class="fa-solid fa-heart"></i>
+        <span>Library</span>
+      </a>
+      <a href="{% url 'faq' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'faq' %}active{% endif %}">
+        <i class="fa-solid fa-circle-question"></i>
+        <span>FAQ</span>
+      </a>
+      <a href="{% url 'support' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'support' %}active{% endif %}">
+        <i class="fa-solid fa-headset"></i>
+        <span>Support</span>
+      </a>
+    </nav>
+
   </div>
 
   <!-- Modal: Moodify AI Music Studio -->
@@ -354,12 +378,12 @@
        ========================================================================== -->
   
   <!-- Floating Launcher Button -->
-  <button type="button" class="chat-launcher-btn" id="chatLauncherBtn" title="Open AI Support Assistant (Grounded in SQL FAQ & Error Codes)">
+  <button type="button" class="chat-launcher-btn" id="chatLauncherBtn" title="Open Support Assistant">
     <div class="chat-bot-avatar" style="width: 28px; height: 28px; font-size: 0.8rem;">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
     </div>
     <span>AI Assistant</span>
-    <span class="chat-launcher-badge" title="Grounded in SQL FAQ &amp; Error Directory"></span>
+    <span class="chat-launcher-badge"></span>
   </button>
 
   <!-- Expandable Chat Panel Window -->
@@ -373,7 +397,7 @@
         </div>
         <div class="chat-header-meta">
           <h4>MoodMusic AI Assistant</h4>
-          <span><i class="fa-solid fa-circle" style="color: var(--sp-green); font-size: 0.55rem;"></i> SQL Knowledge Grounded &bull; MongoDB Logged</span>
+          <span><i class="fa-solid fa-circle" style="color: var(--sp-green); font-size: 0.55rem;"></i> Online &bull; Ready to help</span>
         </div>
       </div>
       <button type="button" class="chat-close-btn" id="chatCloseBtn" title="Minimize Chat">&times;</button>
@@ -405,10 +429,7 @@
             <i class="fa-solid fa-robot"></i> MoodMusic Support Bot
           </div>
           <p>
-            Hello! I'm your integrated AI Assistant. I can answer frequently asked questions from our SQL knowledge base, explain HTTP &amp; site-specific error codes (including <strong>400, 401, 403, 404, 429, 500, 503, and 488</strong>), and automatically file <strong>Support Tickets</strong> in our SQL database whenever you need human assistance.
-          </p>
-          <p style="font-size: 0.8rem; color: #a1a1aa; margin: 0;">
-            How can I help you today?
+            Hello! am the mood musuc support bot.
           </p>
         </div>
       </div>
@@ -557,7 +578,7 @@
       row.id = id;
       row.innerHTML = `
         <div class="chat-bubble" style="display:flex;align-items:center;gap:6px;color:#a1a1aa;font-size:0.8rem;">
-          <i class="fa-solid fa-spinner fa-spin" style="color:#c084fc;"></i> Assistant is searching SQL FAQ &amp; Error Directory...
+          <i class="fa-solid fa-spinner fa-spin" style="color:#c084fc;"></i> Assistant is typing...
         </div>`;
       chatMessagesContainer.appendChild(row);
       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
@@ -595,14 +616,14 @@
               <i class="fa-solid fa-ticket"></i> Need Engineering Support?
             </div>
             <div style="font-size:0.78rem;color:#d4d4d8;margin-bottom:8px;">
-              I can immediately file an official Support Ticket stored in our SQL database.
+              I can immediately file an official Support Ticket for our team to resolve.
             </div>
             <button 
               type="button" 
               onclick="triggerDirectTicketCreate('${escapeHtml(defaultSubject)}', '${msgId}');"
               style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:9999px;font-size:0.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"
             >
-              <i class="fa-solid fa-paper-plane"></i> File Support Ticket in SQL
+              <i class="fa-solid fa-paper-plane"></i> File Support Ticket
             </button>
           </div>`;
       }
@@ -612,7 +633,7 @@
         html += `
           <div style="margin-top:12px;padding:12px;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.35);border-radius:10px;">
             <div style="font-weight:800;color:var(--sp-green);font-size:0.85rem;margin-bottom:4px;">
-              <i class="fa-solid fa-circle-check"></i> Support Ticket Created in SQL Database!
+              <i class="fa-solid fa-circle-check"></i> Support Ticket Created Successfully!
             </div>
             <div style="font-size:0.8rem;color:#e4e4e7;">
               Ticket ID: <strong style="color:#fff;">${data.ticket_created.ticket_number}</strong><br>
@@ -630,13 +651,12 @@
       html += `
         <div class="chat-feedback-bar" id="fb_bar_${msgId}">
           <span>Helpful?</span>
-          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 5, 'thumbs_up');" title="Helpful (Store in MongoDB)">
+          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 5, 'thumbs_up');" title="Helpful">
             <i class="fa-solid fa-thumbs-up"></i>
           </button>
-          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 1, 'thumbs_down');" title="Not helpful (Store in MongoDB)">
+          <button type="button" class="chat-fb-btn" onclick="sendChatFeedback('${msgId}', 1, 'thumbs_down');" title="Not helpful">
             <i class="fa-solid fa-thumbs-down"></i>
           </button>
-          <span style="margin-left:auto;font-size:0.68rem;opacity:0.7;">Logged to MongoDB</span>
         </div>`;
 
       html += `</div>`;
@@ -675,7 +695,7 @@
             ticketCard.style.cssText = "margin-top:10px;padding:10px 14px;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.4);border-radius:8px;";
             ticketCard.innerHTML = `
               <div style="color:var(--sp-green);font-weight:700;font-size:0.82rem;">
-                <i class="fa-solid fa-check"></i> Ticket ${data.ticket_number} Saved in SQL!
+                <i class="fa-solid fa-check"></i> Ticket ${data.ticket_number} Created Successfully!
               </div>
               <div style="font-size:0.75rem;color:#a1a1aa;margin-top:4px;">
                 <a href="/support/?ticket_number=${data.ticket_number}" target="_blank" style="color:#fff;text-decoration:underline;">View ticket details in Support Center</a>
