@@ -19,27 +19,6 @@
 | **GitHub Repository Link** | [https://github.com/Night07Owl/Moodify](https://github.com/Night07Owl/Moodify) |
 | **Task Sheet Reference** | [Software Development Final Assessment Sheet](https://docs.google.com/spreadsheets/d/1gac3qN_sFgbBQR7utv6N-66-C8szNq3-F6L7NQsbx78/edit?usp=sharing) |
 
----
-
-## ✅ Assessment Requirements Compliance Matrix
-
-| Requirement | Implementation Detail & Verification | Status |
-| :--- | :--- | :---: |
-| **Responsive Website with ≥ 3 Pages** | 1. **Discovery & In-Browser Player** (`/`)<br>2. **FAQ & Error Codes Knowledge Base** (`/faq/`)<br>3. **Support Ticket Center** (`/support/`)<br>4. **System Health Check Dashboard** (`/health/`) | **COMPLIANT** |
-| **Persistent Chat Widget on Every Page** | Floating AI Assistant launcher and expandable interactive panel embedded globally into `templates/base.html`. Accessible on all views and fully responsive on mobile devices. | **COMPLIANT** |
-| **Minimum of 10 FAQs in SQL Database** | **12 FAQs** stored in SQLite via the `FAQ` model in `music/models.py`. Displayed on `/faq/` with live search, category filtering, and direct "Ask Assistant" triggers. | **COMPLIANT** |
-| **Minimum of 8 Error Codes Cataloged** | **8 Error Codes** stored in SQL via `ErrorCode` model in `music/models.py`:<br>• **400** (Bad Request)<br>• **401** (Unauthorized)<br>• **403** (Forbidden)<br>• **404** (Not Found)<br>• **429** (Too Many Requests)<br>• **500** (Internal Server Error)<br>• **503** (Service Unavailable)<br>• **488** (**Site-Specific:** Audio Stream Unavailable) | **COMPLIANT** |
-| **Custom 404 & 500 Pages with "Ask the Assistant"** | Custom `templates/404.html` and `templates/500.html` featuring Spotify-style dark aesthetics, diagnostics pills, and a one-click **"Ask the Assistant"** action that launches the chat widget prefilled with the exact error. Wired to `handler404` and `handler500` in `moodify/urls.py` (testable at `/test-404/` and `/test-500/`). | **COMPLIANT** |
-| **AI Assistant Grounded in FAQ & Error Codes** | `/api/chat/` endpoint uses Google Gemini (`gemini-flash-lite-latest`) grounded in the SQL FAQ repository and Error Code specifications. If the query cannot be answered from the knowledge base, it offers or automatically files a support ticket. Includes a zero-failure rule matcher fallback. | **COMPLIANT** |
-| **Dual Database Architecture (SQL + MongoDB)** | • **SQL (SQLite3):** Stores structured relational entities: `SupportTicket`, `FAQ`, `ErrorCode`, `Song`, `Mood`, `Favorite`.<br>• **MongoDB / mongomock:** Stores unstructured high-throughput telemetry: `chat_logs` (turns, intent, confidence, session IDs) and `chat_feedback` (1-5 ratings, thumbs, comments). | **COMPLIANT** |
-| **API Keys & Secrets in Environment Variables** | `python-dotenv` loads `GEMINI_API_KEY`, `SECRET_KEY`, `MONGODB_URI` from `.env`. Zero confidential credentials committed. `.gitignore` excludes `.env`, `logs/`, and database binaries. `.env.example` provided. | **COMPLIANT** |
-| **Request Logging Middleware** | `music.middleware.RequestLoggingMiddleware` intercepts every incoming HTTP request and records timestamp, client IP, method, full path, response status code, latency (ms), and user agent to `logs/requests.log`. | **COMPLIANT** |
-| **Health Check Page** | `/health/` and `/health/?format=json` inspects SQL database health, MongoDB connection status, Gemini AI readiness, third-party API latency, and displays the last 10 requests from `logs/requests.log`. | **COMPLIANT** |
-| **Third-Party API with Timeout & Fallback** | Apple iTunes Search API (`music/itunes_service.py`) with a **strict 5.0-second timeout** (`urllib.request.urlopen(..., timeout=5.0)`). On timeout or network failure, it seamlessly falls back to a curated local hit catalog, ensuring 100% continuous uptime. | **COMPLIANT** |
-| **Proposed Improvement Included** | Detailed architectural specification for **Real-Time Collaborative Listening Rooms with WebSockets & Vector Mood Embeddings** (see section below). | **COMPLIANT** |
-
----
-
 ## 🏛️ Architecture & Data Persistence Flow
 
 ```
