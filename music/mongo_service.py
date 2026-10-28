@@ -18,6 +18,7 @@ from django.conf import settings
 _mongo_client = None
 _mongo_db = None
 _is_mock = False
+_last_mongo_error = None
 
 
 def get_mongo_database(force_reconnect=False):
@@ -58,6 +59,8 @@ def get_mongo_database(force_reconnect=False):
         print(f"[MongoService] Successfully connected to live MongoDB database '{db_name}'.")
         return _mongo_db, _is_mock
     except Exception as e:
+        global _last_mongo_error
+        _last_mongo_error = str(e)
         print(f"[MongoService] WARNING: Live MongoDB connection failed ({e}). Falling back to in-memory mock.")
         # Graceful fallback to mongomock for seamless zero-setup evaluation
         try:
@@ -440,6 +443,7 @@ def get_mongo_health_stats():
             'users_count': users_count,
             'login_history_count': logins_count,
             'is_mock': is_mock,
+            'connection_error': _last_mongo_error,
         }
     except Exception as err:
         return {
