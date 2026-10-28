@@ -36,12 +36,12 @@ def get_mongo_database(force_reconnect=False):
     mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', 'mongodb+srv://sudhiksha118_db_user:YfTkXQOITckoREoE@mood.dbml9a3.mongodb.net/moodmusic_db?retryWrites=true&w=majority')).strip()
     db_name = getattr(settings, 'MONGODB_NAME', os.environ.get('MONGODB_NAME', 'moodmusic_db')).strip()
 
-    # Attempt real pymongo connection with 7500ms timeout and certifi TLS CA
+    # Attempt real pymongo connection with 10s timeout and certifi TLS CA
     try:
         import pymongo
         client_kwargs = {
-            'serverSelectionTimeoutMS': 7500,
-            'connectTimeoutMS': 7500,
+            'serverSelectionTimeoutMS': 10000,
+            'connectTimeoutMS': 10000,
             'socketTimeoutMS': 10000,
         }
         try:
@@ -50,12 +50,22 @@ def get_mongo_database(force_reconnect=False):
         except Exception:
             pass
 
-        client = pymongo.MongoClient(mongo_uri, **client_kwargs)
-        # Verify connection by triggering a quick ping to the admin database
-        client.admin.command('ping')
+        try:
+            client = pymongo.MongoClient(mongo_uri, **client_kwargs)
+            client.admin.command('ping')
+        except Exception as primary_err:
+            # If custom CA bundle failed, retry with system default SSL certificates
+            if 'tlsCAFile' in client_kwargs:
+                client_kwargs.pop('tlsCAFile')
+                client = pymongo.MongoClient(mongo_uri, **client_kwargs)
+                client.admin.command('ping')
+            else:
+                raise primary_err
+
         _mongo_client = client
         _mongo_db = client[db_name]
         _is_mock = False
+        _last_mongo_error = None
         print(f"[MongoService] Successfully connected to live MongoDB database '{db_name}'.")
         return _mongo_db, _is_mock
     except Exception as e:
