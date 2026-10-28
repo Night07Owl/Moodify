@@ -27,7 +27,7 @@ def get_mongo_database(force_reconnect=False):
     Ensures safe singleton connection. If a mock was previously active due to a transient
     network delay, subsequent calls will attempt to re-establish a live Atlas connection.
     """
-    global _mongo_client, _mongo_db, _is_mock
+    global _mongo_client, _mongo_db, _is_mock, _last_mongo_error
 
     # If we already have an active LIVE connection and no forced reconnect, reuse it
     if _mongo_db is not None and not _is_mock and not force_reconnect:
@@ -69,7 +69,6 @@ def get_mongo_database(force_reconnect=False):
         print(f"[MongoService] Successfully connected to live MongoDB database '{db_name}'.")
         return _mongo_db, _is_mock
     except Exception as e:
-        global _last_mongo_error
         _last_mongo_error = str(e)
         print(f"[MongoService] WARNING: Live MongoDB connection failed ({e}). Falling back to in-memory mock.")
         # Graceful fallback to mongomock for seamless zero-setup evaluation
@@ -256,7 +255,7 @@ def record_support_ticket(ticket):
         return None
 
 
-def create_mongo_user(username, email, password):
+def create_mongo_user(username, email, password, ip_address='127.0.0.1', user_agent='Unknown'):
     """
     Registers a new user in MongoDB 'users' collection.
     Stores username, email, display_name, and secure hashed password.
@@ -288,6 +287,8 @@ def create_mongo_user(username, email, password):
             'password': make_password(password),
             'created_at': datetime.utcnow(),
             'last_login': datetime.utcnow(),
+            'signup_ip': ip_address,
+            'last_login_ip': ip_address,
             'login_count': 1,
             'role': 'user',
             'storage_engine': 'mongomock' if is_mock else 'mongodb',
@@ -300,6 +301,8 @@ def create_mongo_user(username, email, password):
             username=u_clean,
             email=e_clean,
             success=True,
+            ip_address=ip_address,
+            user_agent=user_agent,
             details="User registration / initial account creation"
         )
 
@@ -453,7 +456,7 @@ def get_mongo_health_stats():
             'users_count': users_count,
             'login_history_count': logins_count,
             'is_mock': is_mock,
-            'connection_error': _last_mongo_error,
+            'connection_error': None if not is_mock else _last_mongo_error,
         }
     except Exception as err:
         return {

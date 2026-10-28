@@ -258,7 +258,9 @@ def signup_view(request):
         elif len(password) < 6:
             messages.error(request, "Password must be at least 6 characters.")
         else:
-            success, result = mongo_service.create_mongo_user(username, email, password)
+            client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '127.0.0.1')
+            user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
+            success, result = mongo_service.create_mongo_user(username, email, password, ip_address=client_ip, user_agent=user_agent)
             if success:
                 from django.contrib.auth.models import User
                 django_user, _ = User.objects.get_or_create(username=username.lower(), defaults={'email': email.lower()})
