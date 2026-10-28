@@ -32,7 +32,7 @@ def get_mongo_database(force_reconnect=False):
     if _mongo_db is not None and not _is_mock and not force_reconnect:
         return _mongo_db, _is_mock
 
-    mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', 'mongodb://127.0.0.1:27017/moodmusic_db')).strip()
+    mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', 'mongodb+srv://sudhiksha118_db_user:YfTkXQOITckoREoE@mood.dbml9a3.mongodb.net/moodmusic_db?retryWrites=true&w=majority')).strip()
     db_name = getattr(settings, 'MONGODB_NAME', os.environ.get('MONGODB_NAME', 'moodmusic_db')).strip()
 
     # Attempt real pymongo connection with 7500ms timeout and certifi TLS CA
