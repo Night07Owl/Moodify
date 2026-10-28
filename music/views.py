@@ -237,7 +237,8 @@ def favorites_list(request):
 def signup_view(request):
     """
     User registration view.
-    Stores account credentials in MongoDB 'users' collection and logs in.
+    Stores account credentials in MongoDB 'users' collection, records login activity,
+    and logs in to establish session.
     """
     if request.user.is_authenticated:
         return redirect('home')
@@ -264,7 +265,7 @@ def signup_view(request):
                 django_user.set_password(password)
                 django_user.save()
                 login(request, django_user)
-                messages.success(request, f"Welcome to Moodify, {username}! Your account has been registered.")
+                messages.success(request, f"Welcome to Moodify, {username}! Your account has been registered and saved to MongoDB.")
                 return redirect('home')
             else:
                 messages.error(request, result)
@@ -275,7 +276,8 @@ def signup_view(request):
 def login_view(request):
     """
     User authentication view.
-    Validates credentials against MongoDB 'users' collection and establishes session.
+    Validates credentials against MongoDB 'users' collection, updates last_login,
+    records login activity in 'login_history', and establishes session.
     """
     if request.user.is_authenticated:
         return redirect('home')
@@ -283,6 +285,9 @@ def login_view(request):
     if request.method == 'POST':
         username_or_email = request.POST.get('username_or_email', '').strip()
         password = request.POST.get('password', '')
+
+        client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '127.0.0.1')
+        user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
 
         if not username_or_email or not password:
             messages.error(request, "Please enter your username/email and password.")
@@ -294,11 +299,46 @@ def login_view(request):
                 u_email = mongo_user.get('email', '')
                 django_user, _ = User.objects.get_or_create(username=u_name, defaults={'email': u_email})
                 login(request, django_user)
+
+                mongo_service.record_login_activity(
+                    username=u_name,
+                    email=u_email,
+                    success=True,
+                    ip_address=client_ip,
+                    user_agent=user_agent,
+                    details="Successful password authentication via MongoDB"
+                )
+
                 messages.success(request, f"Welcome back, {mongo_user.get('display_name', u_name)}!")
                 next_url = request.GET.get('next') or request.POST.get('next') or 'home'
                 return redirect(next_url)
             else:
-                messages.error(request, "Invalid username/email or password. Please try again.")
+                from django.contrib.auth import authenticate as django_auth
+                django_user = django_auth(request, username=username_or_email.lower(), password=password)
+                if django_user is not None:
+                    login(request, django_user)
+                    mongo_service.sync_user_to_mongo(django_user, raw_password=password)
+                    mongo_service.record_login_activity(
+                        username=django_user.username,
+                        email=django_user.email,
+                        success=True,
+                        ip_address=client_ip,
+                        user_agent=user_agent,
+                        details="Successful authentication (auto-synced to MongoDB)"
+                    )
+                    messages.success(request, f"Welcome back, {django_user.username}!")
+                    next_url = request.GET.get('next') or request.POST.get('next') or 'home'
+                    return redirect(next_url)
+                else:
+                    mongo_service.record_login_activity(
+                        username=username_or_email,
+                        email='',
+                        success=False,
+                        ip_address=client_ip,
+                        user_agent=user_agent,
+                        details="Failed login attempt - invalid credentials"
+                    )
+                    messages.error(request, "Invalid username/email or password. Please try again.")
 
     return render(request, 'music/login.html')
 
