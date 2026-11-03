@@ -805,6 +805,274 @@ def api_create_ticket(request):
     })
 
 
+def api_faqs(request):
+    """
+    REST API endpoint for FAQs stored in SQL database.
+    Query parameters:
+    - q: Search across question, answer, and category.
+    - category: Filter by FAQ category.
+    """
+    category = request.GET.get('category', '').strip()
+    query = request.GET.get('q', '').strip()
+
+    faqs = FAQ.objects.all().order_by('order', 'id')
+    if category and category != 'All':
+        faqs = faqs.filter(category=category)
+    if query:
+        faqs = faqs.filter(
+            Q(question__icontains=query) |
+            Q(answer__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    categories = list(FAQ.objects.values_list('category', flat=True).distinct())
+
+    data = [
+        {
+            'id': f.id,
+            'category': f.category,
+            'question': f.question,
+            'answer': f.answer,
+            'order': f.order,
+        }
+        for f in faqs
+    ]
+
+    return JsonResponse({
+        'success': True,
+        'count': len(data),
+        'source': 'SQLite3 SQL Database (music_faq)',
+        'categories': categories,
+        'faqs': data
+    })
+
+
+def api_error_codes(request):
+    """
+    REST API endpoint for Error Codes stored in SQL database.
+    """
+    code_query = request.GET.get('code', '').strip()
+    query = request.GET.get('q', '').strip()
+
+    codes = ErrorCode.objects.all().order_by('code')
+    if code_query and code_query.isdigit():
+        codes = codes.filter(code=int(code_query))
+    if query:
+        codes = codes.filter(
+            Q(code__icontains=query) |
+            Q(name__icontains=query) |
+            Q(meaning__icontains=query) |
+            Q(common_causes__icontains=query)
+        )
+
+    data = [
+        {
+            'id': e.id,
+            'code': e.code,
+            'name': e.name,
+            'category': e.category,
+            'meaning': e.meaning,
+            'common_causes': e.common_causes,
+            'troubleshooting_steps': e.troubleshooting_steps,
+            'is_site_specific': e.is_site_specific,
+        }
+        for e in codes
+    ]
+
+    return JsonResponse({
+        'success': True,
+        'count': len(data),
+        'source': 'SQLite3 SQL Database (music_errorcode)',
+        'error_codes': data
+    })
+
+
+def api_tickets_list(request):
+    """
+    REST API endpoint returning all support tickets stored in the SQL database.
+    Supports ?status= and ?email= filtering.
+    """
+    status_filter = request.GET.get('status', '').strip()
+    email_filter = request.GET.get('email', '').strip()
+
+    tickets = SupportTicket.objects.all().order_by('-created_at')
+    if status_filter:
+        tickets = tickets.filter(status__iexact=status_filter)
+    if email_filter:
+        tickets = tickets.filter(user_email__iexact=email_filter)
+
+    data = [
+        {
+            'ticket_number': t.ticket_number,
+            'user_name': t.user_name,
+            'user_email': t.user_email,
+            'subject': t.subject,
+            'category': t.category,
+            'priority': t.priority,
+            'description': t.description,
+            'status': t.status,
+            'ai_generated': t.ai_generated,
+            'resolution_notes': t.resolution_notes,
+            'created_at': t.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+            'updated_at': t.updated_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+        }
+        for t in tickets
+    ]
+    return JsonResponse({
+        'success': True,
+        'count': len(data),
+        'tickets': data
+    })
+
+
+@csrf_exempt
+def api_ticket_detail(request, ticket_number):
+    """
+    CRUD Endpoint: Read, Update, or Delete a single support ticket by its ticket_number.
+    - GET: Read ticket details
+    - POST / PUT / PATCH: Update ticket fields (status, priority, resolution_notes)
+    - DELETE: Delete ticket
+    """
+    ticket = SupportTicket.objects.filter(ticket_number__iexact=ticket_number).first()
+    if not ticket:
+        return JsonResponse({'success': False, 'error': f"Ticket '{ticket_number}' not found."}, status=404)
+
+    if request.method == 'GET':
+        return JsonResponse({
+            'success': True,
+            'ticket': {
+                'ticket_number': ticket.ticket_number,
+                'user_name': ticket.user_name,
+                'user_email': ticket.user_email,
+                'subject': ticket.subject,
+                'category': ticket.category,
+                'priority': ticket.priority,
+                'description': ticket.description,
+                'status': ticket.status,
+                'ai_generated': ticket.ai_generated,
+                'resolution_notes': ticket.resolution_notes,
+                'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                'updated_at': ticket.updated_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+            }
+        })
+
+    elif request.method in ('POST', 'PUT', 'PATCH'):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.POST
+
+        if 'status' in data and data['status'] in dict(SupportTicket.STATUS_CHOICES):
+            ticket.status = data['status']
+        if 'priority' in data and data['priority'] in dict(SupportTicket.PRIORITY_CHOICES):
+            ticket.priority = data['priority']
+        if 'resolution_notes' in data:
+            ticket.resolution_notes = data['resolution_notes'].strip()
+        if 'subject' in data and data['subject'].strip():
+            ticket.subject = data['subject'].strip()
+
+        ticket.save()
+        mongo_service.record_support_ticket(ticket)
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Ticket '{ticket.ticket_number}' updated successfully.",
+            'status': ticket.status,
+            'priority': ticket.priority,
+            'resolution_notes': ticket.resolution_notes,
+        })
+
+    elif request.method == 'DELETE':
+        t_num = ticket.ticket_number
+        ticket.delete()
+        mongo_service.delete_support_ticket(t_num)
+        return JsonResponse({
+            'success': True,
+            'message': f"Ticket '{t_num}' deleted successfully from SQL and MongoDB."
+        })
+
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def support_ticket_update(request, ticket_number):
+    """
+    CRUD Update View: Updates an existing Support Ticket.
+    Handles HTML form submission (from /support/) and AJAX JSON requests.
+    """
+    ticket = get_object_or_404(SupportTicket, ticket_number__iexact=ticket_number)
+
+    if request.method in ('POST', 'PUT'):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.POST
+
+        new_status = data.get('status', ticket.status).strip()
+        new_priority = data.get('priority', ticket.priority).strip()
+        new_notes = data.get('resolution_notes', ticket.resolution_notes).strip()
+
+        if new_status in dict(SupportTicket.STATUS_CHOICES):
+            ticket.status = new_status
+        if new_priority in dict(SupportTicket.PRIORITY_CHOICES):
+            ticket.priority = new_priority
+        ticket.resolution_notes = new_notes
+        ticket.save()
+
+        # Update in Mongo
+        mongo_service.record_support_ticket(ticket)
+
+        is_ajax = (
+            request.path.startswith('/api/') or
+            request.content_type == 'application/json' or
+            request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+            'application/json' in request.headers.get('accept', '')
+        )
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'message': f"Ticket {ticket.ticket_number} updated to {ticket.status}.",
+                'ticket_number': ticket.ticket_number,
+                'status': ticket.status
+            })
+
+        messages.success(request, f"Ticket {ticket.ticket_number} updated successfully ({ticket.status}).")
+        return redirect(f"/support/?ticket_number={ticket.ticket_number}")
+
+    return redirect(f"/support/?ticket_number={ticket.ticket_number}")
+
+
+@csrf_exempt
+def support_ticket_delete(request, ticket_number):
+    """
+    CRUD Delete View: Deletes an existing Support Ticket from SQL and MongoDB.
+    Handles HTML form submission (from /support/) and AJAX JSON requests.
+    """
+    ticket = get_object_or_404(SupportTicket, ticket_number__iexact=ticket_number)
+
+    if request.method in ('POST', 'DELETE'):
+        t_num = ticket.ticket_number
+        ticket.delete()
+        mongo_service.delete_support_ticket(t_num)
+
+        is_ajax = (
+            request.path.startswith('/api/') or
+            request.content_type == 'application/json' or
+            request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+            'application/json' in request.headers.get('accept', '')
+        )
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'message': f"Ticket {t_num} has been deleted."
+            })
+
+        messages.success(request, f"Ticket {t_num} has been successfully deleted.")
+        return redirect('support')
+
+    return redirect('support')
+
+
 def health_check_view(request):
     """
     System Health Check Dashboard & Endpoint.

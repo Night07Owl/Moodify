@@ -33,7 +33,7 @@ def get_mongo_database(force_reconnect=False):
     if _mongo_db is not None and not _is_mock and not force_reconnect:
         return _mongo_db, _is_mock
 
-    mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', 'mongodb+srv://sudhiksha118_db_user:YfTkXQOITckoREoE@mood.dbml9a3.mongodb.net/moodmusic_db?retryWrites=true&w=majority')).strip()
+    mongo_uri = getattr(settings, 'MONGODB_URI', os.environ.get('MONGODB_URI', '')).strip()
     db_name = getattr(settings, 'MONGODB_NAME', os.environ.get('MONGODB_NAME', 'moodmusic_db')).strip()
 
     # Attempt real pymongo connection with 10s timeout and certifi TLS CA
@@ -253,6 +253,21 @@ def record_support_ticket(ticket):
     except Exception as err:
         print(f"[MongoService] Error logging support ticket: {err}")
         return None
+
+
+def delete_support_ticket(ticket_number):
+    """
+    Deletes a support ticket from MongoDB collection 'support_tickets'.
+    """
+    try:
+        db, is_mock = get_mongo_database()
+        res = db['support_tickets'].delete_one({'ticket_number': ticket_number})
+        deleted = getattr(res, 'deleted_count', 0) > 0
+        print(f"[MongoService] Deleted support ticket '{ticket_number}' from MongoDB: {deleted}")
+        return deleted
+    except Exception as err:
+        print(f"[MongoService] Error deleting support ticket from Mongo: {err}")
+        return False
 
 
 def create_mongo_user(username, email, password, ip_address='127.0.0.1', user_agent='Unknown'):

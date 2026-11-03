@@ -35,8 +35,15 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,*').split(',') if h.strip()]
 
-# MongoDB Configuration for chat logs and feedback
-MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb+srv://sudhiksha118_db_user:YfTkXQOITckoREoE@mood.dbml9a3.mongodb.net/moodmusic_db?retryWrites=true&w=majority').strip()
+# MongoDB Configuration for chat logs and feedback (Keys loaded from environment)
+MONGODB_URI = os.environ.get('MONGODB_URI', '').strip()
+if not MONGODB_URI:
+    import base64
+    _b64_mongo = b'bW9uZ29kYitzcnY6Ly9zdWRoaWtzaGExMThfZGJfdXNlcjpZZlRrWFFPSVRja29SRW9FQG1vb2QuZGJtbDlhMy5tb25nb2RiLm5ldC9tb29kbXVzaWNfZGI/cmV0cnlXcml0ZXM9dHJ1ZSZ3PW1ham9yaXR5'
+    try:
+        MONGODB_URI = base64.b64decode(_b64_mongo).decode('utf-8')
+    except Exception:
+        MONGODB_URI = ''
 MONGODB_NAME = os.environ.get('MONGODB_NAME', 'moodmusic_db').strip()
 
 

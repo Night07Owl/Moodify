@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Support Center & Tickets | Moodify{% endblock %}
+{% block title %}Support Center &amp; Tickets (Full CRUD) | Moodify{% endblock %}
 
 {% block content %}
 <div class="support-page-wrapper" style="padding: 30px 24px 60px 24px; max-width: 1200px; margin: 0 auto;">
@@ -15,20 +15,32 @@
 
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px; position: relative; z-index: 2;">
       <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(29, 185, 84, 0.15); border: 1px solid rgba(29, 185, 84, 0.35); padding: 4px 14px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: var(--sp-green); margin-bottom: 12px;">
+          <i class="fa-solid fa-layer-group"></i> Full CRUD System &bull; Relational SQL + MongoDB NoSQL Synchronization
+        </div>
         <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;">
           Support Ticket Center
         </h1>
         <p style="color: #a1a1aa; font-size: 1rem; max-width: 650px; line-height: 1.5; margin: 0;">
-          Submit and track customer service inquiries and technical error reports. Our team is here to assist you.
+          Create, track, update status, and manage technical support tickets. Created tickets automatically mirror between SQLite and MongoDB Atlas.
         </p>
       </div>
 
-      <!-- Quick AI Chat CTA -->
-      <div>
+      <!-- Quick Actions: API Link & AI Assistant CTA -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <a 
+          href="{% url 'api_tickets_list' %}" 
+          target="_blank"
+          style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e4e4e7; padding: 10px 18px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;"
+        >
+          <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
+          <span>/api/tickets/</span>
+        </a>
+
         <button 
           type="button" 
           onclick="openChatWithPrompt('I need help with an issue on MoodMusic. Can you assist me or create a ticket?');"
-          style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 12px 22px; border-radius: 9999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); transition: transform 0.2s;"
+          style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 11px 22px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); transition: transform 0.2s;"
         >
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>Ask AI Assistant First</span>
@@ -36,19 +48,35 @@
       </div>
     </div>
 
-    <!-- Stat Badges -->
-    <div style="display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap;">
-      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 20px;">
-        <div style="font-size: 0.75rem; color: #71717a; text-transform: uppercase; font-weight: 700;">Total Tickets</div>
-        <div style="font-size: 1.5rem; font-weight: 900; color: #fff; font-family: 'Outfit', sans-serif;">{{ total_tickets }}</div>
+    <!-- Stat Badges & CRUD Capability Pills -->
+    <div style="display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; align-items: center;">
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 18px;">
+        <div style="font-size: 0.72rem; color: #71717a; text-transform: uppercase; font-weight: 700;">Total Tickets</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: #fff; font-family: 'Outfit', sans-serif;">{{ total_tickets }}</div>
       </div>
-      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 12px; padding: 12px 20px;">
-        <div style="font-size: 0.75rem; color: #eab308; text-transform: uppercase; font-weight: 700;">Open &amp; Pending</div>
-        <div style="font-size: 1.5rem; font-weight: 900; color: #fde047; font-family: 'Outfit', sans-serif;">{{ open_tickets }}</div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 12px; padding: 10px 18px;">
+        <div style="font-size: 0.72rem; color: #eab308; text-transform: uppercase; font-weight: 700;">Open &amp; Pending</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: #fde047; font-family: 'Outfit', sans-serif;">{{ open_tickets }}</div>
       </div>
-      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(29, 185, 84, 0.2); border-radius: 12px; padding: 12px 20px;">
-        <div style="font-size: 0.75rem; color: var(--sp-green); text-transform: uppercase; font-weight: 700;">Resolved</div>
-        <div style="font-size: 1.5rem; font-weight: 900; color: var(--sp-green); font-family: 'Outfit', sans-serif;">{{ resolved_tickets }}</div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(29, 185, 84, 0.2); border-radius: 12px; padding: 10px 18px;">
+        <div style="font-size: 0.72rem; color: var(--sp-green); text-transform: uppercase; font-weight: 700;">Resolved</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: var(--sp-green); font-family: 'Outfit', sans-serif;">{{ resolved_tickets }}</div>
+      </div>
+
+      <!-- CRUD Verification Badges -->
+      <div style="margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">
+          [C] Create
+        </span>
+        <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">
+          [R] Read
+        </span>
+        <span style="background: rgba(234, 179, 8, 0.15); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">
+          [U] Update
+        </span>
+        <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">
+          [D] Delete
+        </span>
       </div>
     </div>
 
@@ -57,7 +85,7 @@
   <!-- Ticket Lookup Bar -->
   <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px 24px; margin-bottom: 32px;">
     <h3 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-      <i class="fa-solid fa-magnifying-glass" style="color: #38bdf8;"></i> Track an Existing Support Ticket by Number
+      <i class="fa-solid fa-magnifying-glass" style="color: #38bdf8;"></i> Track &amp; Manage an Existing Support Ticket by Number (Read, Update, Delete)
     </h3>
     <form action="{% url 'support' %}" method="GET" style="display: flex; gap: 10px; max-width: 600px;">
       <input 
@@ -80,31 +108,109 @@
       {% endif %}
     </form>
 
-    <!-- Looked Up Ticket Result -->
+    <!-- Looked Up Ticket Result with CRUD Update & Delete Controls -->
     {% if search_ticket_query %}
       <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
         {% if searched_ticket %}
-          <div style="background: rgba(29, 185, 84, 0.1); border: 1px solid rgba(29, 185, 84, 0.3); border-radius: 12px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff;">
+          <div style="background: rgba(29, 185, 84, 0.08); border: 1px solid rgba(29, 185, 84, 0.3); border-radius: 14px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <span style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: #fff;">
                 {{ searched_ticket.ticket_number }}
               </span>
-              <span style="background: {% if searched_ticket.status == 'Resolved' %}rgba(29, 185, 84, 0.25){% elif searched_ticket.status == 'Open' %}rgba(234, 179, 8, 0.25){% else %}rgba(56, 189, 248, 0.25){% endif %}; color: #fff; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700;">
-                {{ searched_ticket.status }}
-              </span>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="background: {% if searched_ticket.status == 'Resolved' %}rgba(29, 185, 84, 0.25){% elif searched_ticket.status == 'Open' %}rgba(234, 179, 8, 0.25){% else %}rgba(56, 189, 248, 0.25){% endif %}; color: #fff; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700;">
+                  Status: {{ searched_ticket.status }}
+                </span>
+                <span style="background: rgba(255,255,255,0.08); color: #d4d4d8; padding: 4px 10px; border-radius: 9999px; font-size: 0.78rem;">
+                  Priority: {{ searched_ticket.priority }}
+                </span>
+              </div>
             </div>
-            <h4 style="font-size: 1.05rem; color: #fff; margin: 0 0 6px 0;">{{ searched_ticket.subject }}</h4>
-            <div style="font-size: 0.85rem; color: #a1a1aa; margin-bottom: 10px;">
-              Contact: <code>{{ searched_ticket.user_email }}</code> &bull; Priority: {{ searched_ticket.priority }} &bull; Submitted: {{ searched_ticket.created_at|date:"M d, Y H:i" }}
+
+            <h4 style="font-size: 1.1rem; color: #fff; margin: 0 0 6px 0;">{{ searched_ticket.subject }}</h4>
+            <div style="font-size: 0.85rem; color: #a1a1aa; margin-bottom: 12px;">
+              Author: <strong>{{ searched_ticket.user_name }}</strong> &bull; Contact: <code>{{ searched_ticket.user_email }}</code> &bull; Submitted: {{ searched_ticket.created_at|date:"M d, Y H:i" }} UTC
             </div>
-            <div style="background: #121218; padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; color: #e4e4e7; line-height: 1.5;">
+            
+            <div style="background: #121218; padding: 14px 16px; border-radius: 8px; font-size: 0.9rem; color: #e4e4e7; line-height: 1.5; margin-bottom: 14px;">
               {{ searched_ticket.description }}
             </div>
+
             {% if searched_ticket.resolution_notes %}
-              <div style="margin-top: 12px; background: rgba(29, 185, 84, 0.15); padding: 12px 14px; border-radius: 8px; font-size: 0.88rem; color: #4ade80;">
-                <strong>Engineer Resolution Notes:</strong> {{ searched_ticket.resolution_notes }}
+              <div style="margin-bottom: 16px; background: rgba(29, 185, 84, 0.15); border: 1px solid rgba(29, 185, 84, 0.3); padding: 12px 14px; border-radius: 8px; font-size: 0.88rem; color: #4ade80;">
+                <strong><i class="fa-solid fa-clipboard-check"></i> Resolution Notes:</strong> {{ searched_ticket.resolution_notes }}
               </div>
             {% endif %}
+
+            <!-- CRUD ACTION CONTROLS: Update & Delete -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+              <!-- Quick Resolve Button -->
+              {% if searched_ticket.status != 'Resolved' %}
+                <form action="{% url 'support_ticket_update' searched_ticket.ticket_number %}" method="POST" style="display: inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="status" value="Resolved">
+                  <input type="hidden" name="resolution_notes" value="Marked as resolved by user / support engineer.">
+                  <button type="submit" style="background: var(--sp-green); color: #000; border: none; padding: 8px 16px; border-radius: 9999px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-check"></i> Mark as Resolved
+                  </button>
+                </form>
+              {% endif %}
+
+              <!-- Toggle Edit Form Button -->
+              <button 
+                type="button" 
+                onclick="document.getElementById('editTicketFormBox').style.display = document.getElementById('editTicketFormBox').style.display === 'none' ? 'block' : 'none';"
+                style="background: #27272a; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 9999px; font-weight: 600; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+              >
+                <i class="fa-solid fa-pen"></i> Edit / Update Status &amp; Notes
+              </button>
+
+              <!-- Delete Button -->
+              <form action="{% url 'support_ticket_delete' searched_ticket.ticket_number %}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete ticket {{ searched_ticket.ticket_number }}?');" style="display: inline; margin-left: auto;">
+                {% csrf_token %}
+                <button type="submit" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 8px 16px; border-radius: 9999px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-trash-can"></i> Delete Ticket
+                </button>
+              </form>
+            </div>
+
+            <!-- Expandable Edit Form (CRUD: Update) -->
+            <div id="editTicketFormBox" style="display: none; margin-top: 16px; background: #121218; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px;">
+              <h5 style="color: #fff; margin: 0 0 12px 0; font-size: 0.95rem;">Update Ticket Details (CRUD: Update)</h5>
+              <form action="{% url 'support_ticket_update' searched_ticket.ticket_number %}" method="POST">
+                {% csrf_token %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; color: #a1a1aa; margin-bottom: 4px;">Status</label>
+                    <select name="status" style="width: 100%; background: #181824; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 0.85rem;">
+                      <option value="Open" {% if searched_ticket.status == 'Open' %}selected{% endif %}>Open</option>
+                      <option value="In Progress" {% if searched_ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                      <option value="Resolved" {% if searched_ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                      <option value="Closed" {% if searched_ticket.status == 'Closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 0.78rem; color: #a1a1aa; margin-bottom: 4px;">Priority</label>
+                    <select name="priority" style="width: 100%; background: #181824; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 0.85rem;">
+                      <option value="Low" {% if searched_ticket.priority == 'Low' %}selected{% endif %}>Low</option>
+                      <option value="Medium" {% if searched_ticket.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                      <option value="High" {% if searched_ticket.priority == 'High' %}selected{% endif %}>High</option>
+                      <option value="Urgent" {% if searched_ticket.priority == 'Urgent' %}selected{% endif %}>Urgent</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="display: block; font-size: 0.78rem; color: #a1a1aa; margin-bottom: 4px;">Resolution / Engineering Notes</label>
+                  <textarea name="resolution_notes" rows="3" style="width: 100%; background: #181824; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 0.85rem;">{{ searched_ticket.resolution_notes }}</textarea>
+                </div>
+
+                <button type="submit" style="background: var(--sp-green); color: #000; border: none; padding: 8px 18px; border-radius: 9999px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+                  Save Updates
+                </button>
+              </form>
+            </div>
+
           </div>
         {% else %}
           <div style="color: #f87171; font-size: 0.9rem;">
@@ -118,14 +224,19 @@
   <!-- Form and Recent Tickets Grid -->
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start;">
     
-    <!-- LEFT: Submit New Ticket Form -->
+    <!-- LEFT: Submit New Ticket Form (CRUD: Create) -->
     <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
-      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-pen-to-square" style="color: var(--sp-green);"></i>
-        <span>Create a Support Ticket</span>
-      </h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-pen-to-square" style="color: var(--sp-green);"></i>
+          <span>Create a Support Ticket</span>
+        </h2>
+        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+          CRUD: CREATE
+        </span>
+      </div>
       <p style="color: #71717a; font-size: 0.85rem; margin-bottom: 20px;">
-        Our team reviews and processes all inquiries promptly.
+        Our team reviews and processes all inquiries promptly. Also available via <code style="color:#38bdf8;">POST /api/ticket/create/</code>.
       </p>
 
       <form action="{% url 'support' %}" method="POST">
@@ -211,24 +322,24 @@
       </form>
     </div>
 
-    <!-- RIGHT: Recent Tickets in SQL Database -->
+    <!-- RIGHT: Recent Tickets in SQL Database (CRUD: Read, Update, Delete) -->
     <div style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i>
-          <span>Recent Tickets</span>
+          <span>Tickets Management</span>
         </h2>
-        <span style="font-size: 0.75rem; color: #71717a;">Auto-synced</span>
+        <span style="font-size: 0.72rem; color: #71717a;">Synced to MongoDB</span>
       </div>
 
-      <div style="display: grid; gap: 12px; max-height: 520px; overflow-y: auto; padding-right: 4px;">
+      <div style="display: grid; gap: 12px; max-height: 540px; overflow-y: auto; padding-right: 4px;">
         {% for t in recent_tickets %}
           <div style="background: #121218; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px 16px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div>
-                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #c084fc; font-size: 0.9rem;">
-                  {{ t.ticket_number }}
-                </span>
+                <a href="{% url 'support' %}?ticket_number={{ t.ticket_number }}" style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #c084fc; font-size: 0.9rem; text-decoration: none;">
+                  {{ t.ticket_number }} &rarr;
+                </a>
                 {% if t.ai_generated %}
                   <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">
                     AI Generated
@@ -245,9 +356,21 @@
               {{ t.description|truncatechars:100 }}
             </div>
             
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #52525b;">
-              <span>{{ t.category }} &bull; {{ t.priority }}</span>
-              <span>{{ t.created_at|date:"M d, H:i" }}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: #52525b; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 8px;">
+              <span>{{ t.category }} &bull; {{ t.priority }} &bull; {{ t.created_at|date:"M d, H:i" }}</span>
+              
+              <!-- Quick Action Pills -->
+              <div style="display: flex; gap: 6px;">
+                <a href="{% url 'support' %}?ticket_number={{ t.ticket_number }}" style="background: #27272a; color: #e4e4e7; padding: 3px 8px; border-radius: 4px; text-decoration: none;">
+                  Manage
+                </a>
+                <form action="{% url 'support_ticket_delete' t.ticket_number %}" method="POST" onsubmit="return confirm('Delete ticket {{ t.ticket_number }}?');" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" style="background: rgba(239, 68, 68, 0.15); border: none; color: #f87171; padding: 3px 8px; border-radius: 4px; cursor: pointer;">
+                    Delete
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         {% empty %}

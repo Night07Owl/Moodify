@@ -6,7 +6,7 @@ and MongoDB NoSQL collections for:
 2. Users (mirrored to MongoDB 'users')
 """
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import SupportTicket
@@ -23,6 +23,17 @@ def auto_sync_support_ticket_to_mongo(sender, instance, created, **kwargs):
         mongo_service.record_support_ticket(instance)
     except Exception as err:
         print(f"[Signals] Error auto-syncing SupportTicket #{instance.ticket_number} to Mongo: {err}")
+
+
+@receiver(post_delete, sender=SupportTicket)
+def auto_delete_support_ticket_from_mongo(sender, instance, **kwargs):
+    """
+    Automatically removes a deleted SupportTicket from MongoDB.
+    """
+    try:
+        mongo_service.delete_support_ticket(instance.ticket_number)
+    except Exception as err:
+        print(f"[Signals] Error deleting SupportTicket #{instance.ticket_number} from Mongo: {err}")
 
 
 @receiver(post_save, sender=User)

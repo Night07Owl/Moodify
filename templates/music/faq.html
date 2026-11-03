@@ -15,17 +15,32 @@
 
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px; position: relative; z-index: 2;">
       <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); padding: 4px 14px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; color: #c084fc; margin-bottom: 12px;">
+          <i class="fa-solid fa-database"></i> Grounded in SQL Database &bull; Powered by REST API
+        </div>
         <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.02em;">
-          Help Center
+          Help Center &amp; Knowledge Base
         </h1>
+        <p style="color: #a1a1aa; font-size: 0.95rem; max-width: 650px; margin: 0;">
+          Browse frequently asked questions, inspect official error codes, or fetch directly via the live REST API.
+        </p>
       </div>
 
-      <!-- Quick Ask Assistant CTA -->
-      <div>
+      <!-- Quick Actions: API Link & Ask Assistant CTA -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <a 
+          href="{% url 'api_faqs' %}" 
+          target="_blank"
+          style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e4e4e7; padding: 10px 18px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;"
+        >
+          <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
+          <span>/api/faqs/</span>
+        </a>
+
         <button 
           type="button" 
           onclick="openChatWithPrompt('Hello! Can you help me understand how MoodMusic works and what error codes exist?');"
-          style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 12px 22px; border-radius: 9999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); transition: transform 0.2s;"
+          style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 11px 22px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); transition: transform 0.2s;"
           onmouseover="this.style.transform='translateY(-2px)';"
           onmouseout="this.style.transform='none';"
         >
@@ -35,15 +50,17 @@
       </div>
     </div>
 
-    <!-- Search Form -->
-    <form action="{% url 'faq' %}" method="GET" style="margin-top: 28px; display: flex; gap: 10px; max-width: 600px;">
+    <!-- Search Form with Instant API Mode -->
+    <form action="{% url 'faq' %}" method="GET" id="faqSearchForm" style="margin-top: 26px; display: flex; gap: 10px; max-width: 650px;">
       <div style="position: relative; flex: 1;">
         <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #71717a;"></i>
         <input 
           type="text" 
+          id="faqSearchInput"
           name="q" 
           placeholder="Search FAQs, keywords, or error codes (e.g. 404, 488, playback)..." 
           value="{{ search_q }}"
+          autocomplete="off"
           style="width: 100%; background: #121218; border: 1px solid rgba(255,255,255,0.15); border-radius: 9999px; padding: 12px 18px 12px 42px; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
           onfocus="this.style.borderColor='#a855f7';"
           onblur="this.style.borderColor='rgba(255,255,255,0.15)';"
@@ -64,16 +81,30 @@
       {% endif %}
     </form>
 
+    <!-- Real-Time API Search Telemetry Indicator -->
+    <div id="apiSearchStatus" style="display: none; margin-top: 12px; font-size: 0.8rem; color: #38bdf8; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-spinner fa-spin"></i> Querying <code style="background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:4px;">/api/faqs/?q=...</code>
+    </div>
+
   </div>
 
-  <!-- Page Sections Nav Tabs -->
-  <div style="display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; flex-wrap: wrap;">
+  <!-- Page Sections Nav Tabs & API Endpoints Bar -->
+  <div style="display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; flex-wrap: wrap; align-items: center;">
     <a href="#faqs-section" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
       <i class="fa-solid fa-list-check"></i> Frequently Asked Questions ({{ faq_count }})
     </a>
     <a href="#error-codes-section" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px;">
       <i class="fa-solid fa-shield-halved"></i> Error Code Directory ({{ error_code_count }})
     </a>
+    
+    <!-- Direct REST API Pills -->
+    <a href="{% url 'api_faqs' %}" target="_blank" style="background: #181824; border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; padding: 8px 14px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-brackets-curly"></i> GET /api/faqs/
+    </a>
+    <a href="{% url 'api_error_codes' %}" target="_blank" style="background: #181824; border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 8px 14px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-brackets-curly"></i> GET /api/error-codes/
+    </a>
+
     <a href="{% url 'support' %}" style="background: #27272a; border: 1px solid rgba(255,255,255,0.1); color: #e4e4e7; padding: 8px 18px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; margin-left: auto;">
       <i class="fa-solid fa-headset"></i> Support Tickets Portal &rarr;
     </a>
@@ -91,59 +122,58 @@
     {% endfor %}
   </div>
 
-  <!-- SECTION 1: FAQs (Stored in SQL) -->
+  <!-- SECTION 1: FAQs (Stored in SQL & Served via REST API) -->
   <section id="faqs-section" style="margin-bottom: 56px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
         <i class="fa-solid fa-circle-question" style="color: #c084fc;"></i>
         <span>Frequently Asked Questions</span>
       </h2>
-      <span style="font-size: 0.85rem; color: #71717a;">Showing {{ faqs|length }} of {{ faq_count }} items</span>
+      <span style="font-size: 0.85rem; color: #71717a;" id="faqCountLabel">Showing {{ faqs|length }} of {{ faq_count }} items</span>
     </div>
 
-    {% if faqs %}
-      <div style="display: grid; gap: 16px;">
-        {% for faq in faqs %}
-          <div class="faq-item-card" style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px 24px; transition: border-color 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-            
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
-              <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; line-height: 1.4;">
-                <span style="color: #a855f7; margin-right: 6px;">#{{ faq.order }}</span> {{ faq.question }}
-              </h3>
-              <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; white-space: nowrap;">
-                {{ faq.category }}
-              </span>
-            </div>
-
-            <p style="color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 16px 0;">
-              {{ faq.answer }}
-            </p>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
-              <span style="font-size: 0.75rem; color: #52525b;">
-                Topic #{{ faq.order }}
-              </span>
-              <button 
-                type="button" 
-                onclick="openChatWithPrompt('{{ faq.question|escapejs }}');"
-                style="background: transparent; border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 9999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;"
-                onmouseover="this.style.background='rgba(168, 85, 247, 0.15)';"
-                onmouseout="this.style.background='transparent';"
-              >
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Ask Assistant about this
-              </button>
-            </div>
-
+    <!-- Container for FAQ Cards -->
+    <div id="faqCardsContainer" style="display: grid; gap: 16px;">
+      {% for faq in faqs %}
+        <div class="faq-item-card" style="background: #181824; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px 24px; transition: border-color 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; line-height: 1.4;">
+              <span style="color: #a855f7; margin-right: 6px;">#{{ faq.order }}</span> {{ faq.question }}
+            </h3>
+            <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; white-space: nowrap;">
+              {{ faq.category }}
+            </span>
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div style="background: #181824; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 40px; text-align: center; color: #71717a;">
-        <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 12px;"></i>
-        <p>No FAQs matched your search term "{{ search_q }}".</p>
-        <a href="{% url 'faq' %}" style="color: #a855f7; text-decoration: underline;">View all FAQs</a>
-      </div>
-    {% endif %}
+
+          <p style="color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; margin: 0 0 16px 0;">
+            {{ faq.answer }}
+          </p>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
+            <span style="font-size: 0.75rem; color: #52525b;">
+              Topic #{{ faq.order }}
+            </span>
+            <button 
+              type="button" 
+              onclick="openChatWithPrompt('{{ faq.question|escapejs }}');"
+              style="background: transparent; border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 9999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;"
+              onmouseover="this.style.background='rgba(168, 85, 247, 0.15)';"
+              onmouseout="this.style.background='transparent';"
+            >
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Ask Assistant about this
+            </button>
+          </div>
+
+        </div>
+      {% empty %}
+        <div style="background: #181824; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 40px; text-align: center; color: #71717a;">
+          <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 12px;"></i>
+          <p>No FAQs matched your query.</p>
+          <a href="{% url 'faq' %}" style="color: #a855f7; text-decoration: underline;">View all FAQs</a>
+        </div>
+      {% endfor %}
+    </div>
   </section>
 
 
@@ -156,7 +186,7 @@
           <span>Official Error Code Directory</span>
         </h2>
         <p style="color: #71717a; font-size: 0.88rem; margin: 0;">
-          Common HTTP and platform status codes with troubleshooting steps.
+          Common HTTP and platform status codes with troubleshooting steps (Available via <code style="color:#f87171;">/api/error-codes/</code>).
         </p>
       </div>
       <span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
@@ -239,4 +269,85 @@
   </section>
 
 </div>
+
+<!-- Client-side Interactive Search & REST API Integration -->
+<script>
+let searchDebounceTimeout = null;
+const searchInput = document.getElementById('faqSearchInput');
+const container = document.getElementById('faqCardsContainer');
+const countLabel = document.getElementById('faqCountLabel');
+const statusIndicator = document.getElementById('apiSearchStatus');
+
+if (searchInput) {
+  searchInput.addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    clearTimeout(searchDebounceTimeout);
+    
+    // If empty and cleared, let standard full page work or reload
+    if (!query) {
+      statusIndicator.style.display = 'none';
+      return;
+    }
+
+    statusIndicator.style.display = 'flex';
+
+    searchDebounceTimeout = setTimeout(async () => {
+      const startTime = performance.now();
+      try {
+        const resp = await fetch(`/api/faqs/?q=${encodeURIComponent(query)}`);
+        const data = await resp.json();
+        const duration = Math.round(performance.now() - startTime);
+
+        statusIndicator.innerHTML = `<i class="fa-solid fa-check" style="color:var(--sp-green);"></i> Loaded ${data.count} FAQs via <code>/api/faqs/?q=...</code> in ${duration}ms`;
+
+        if (data.success && Array.isArray(data.faqs)) {
+          countLabel.innerText = `Showing ${data.faqs.length} items (Live API)`;
+          if (data.faqs.length === 0) {
+            container.innerHTML = `
+              <div style="background:#181824;border:1px dashed rgba(255,255,255,0.1);border-radius:12px;padding:40px;text-align:center;color:#71717a;">
+                <i class="fa-solid fa-magnifying-glass" style="font-size:2rem;margin-bottom:12px;"></i>
+                <p>No FAQs matched "${escapeHtml(query)}" via /api/faqs/.</p>
+              </div>`;
+          } else {
+            container.innerHTML = data.faqs.map(faq => `
+              <div class="faq-item-card" style="background:#181824;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:22px 24px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">
+                  <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin:0;line-height:1.4;">
+                    <span style="color:#a855f7;margin-right:6px;">#${faq.order}</span> ${escapeHtml(faq.question)}
+                  </h3>
+                  <span style="background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.3);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:9999px;">
+                    ${escapeHtml(faq.category)}
+                  </span>
+                </div>
+                <p style="color:#d4d4d8;font-size:0.95rem;line-height:1.6;margin:0 0 16px 0;">
+                  ${escapeHtml(faq.answer)}
+                </p>
+                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;">
+                  <span style="font-size:0.75rem;color:#52525b;">Topic #${faq.order}</span>
+                  <button type="button" onclick="openChatWithPrompt('${escapeHtml(faq.question).replace(/'/g, "\\\'")}');" style="background:transparent;border:1px solid rgba(168,85,247,0.3);color:#c084fc;font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:9999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ask Assistant
+                  </button>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        statusIndicator.innerHTML = `<span style="color:#f87171;">Failed to fetch from /api/faqs/</span>`;
+      }
+    }, 250);
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
+</script>
 {% endblock %}
